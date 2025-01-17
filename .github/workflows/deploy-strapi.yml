@@ -46,8 +46,11 @@ jobs:
       - name: Deploy to Server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOSTNAME: ${{ secrets.SERVER_HOSTNAME }}
+          SERVER_ROOTDIR: ${{ secrets.SERVER_ROOTDIR }}
         run: |
           echo "$SSH_PRIVATE_KEY" > ssh_key
           chmod 600 ssh_key
-          rsync -avz --exclude 'node_modules' --exclude '.git' -e "ssh -i ssh_key" ./ strapi@serviceatlas.meimberg.io:/srv/strapi
-          ssh -i strapi@serviceatlas.meimberg.io 'cd /srv/strapi && npm install && npm run build && pm2 restart strapi-backend'
+          rsync -avz --exclude 'node_modules' --exclude '.git' -e "ssh -i ssh_key" ./ "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
+          ssh -i "$SERVER_USER"@"$SERVER_HOSTNAME" 'cd "$SERVER_ROOTDIR" && npm install && npm run build && pm2 restart strapi-backend'
