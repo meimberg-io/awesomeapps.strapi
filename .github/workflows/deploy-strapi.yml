@@ -50,7 +50,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOSTNAME: ${{ secrets.SERVER_HOSTNAME }}
-          SERVER_ROOTDIR: ${{ secrets.SERVER_ROOTDIR }}
+          SERVER_ROOTDIR: ${{ vars.SERVER_ROOTDIR }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ssh_key
@@ -59,5 +59,6 @@ jobs:
           echo "wutz1"
           rsync -avz --exclude 'node_modules' --exclude '.git' -e "ssh -i ssh_key" ./ "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
           echo "wutz2"
-          ssh -i ssh_key "$SERVER_USER"@"$SERVER_HOSTNAME" 'cd "$SERVER_ROOTDIR" && pwd && ls -la && npm install && pwd && ls -la && npm run build && pm2 restart strapi-backend'
+          echo "$SERVER_ROOTDIR"
+          ssh -i ssh_key "$SERVER_USER"@"$SERVER_HOSTNAME" 'cd "$SERVER_ROOTDIR" && pwd && ls -la && npm install && pwd && ls -la && npm run build && pm2 restart strapi'
           echo "wutz3"
