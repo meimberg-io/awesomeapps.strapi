@@ -1,6 +1,7 @@
 name: Deploy Strapi
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
