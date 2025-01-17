@@ -1,0 +1,34 @@
+
+
+services:
+#  strapi:
+#    build:
+#      context: ./strapi
+#      dockerfile: Dockerfile
+#    ports:
+#      - '1337:1337'
+#    environment:
+#      DATABASE_HOST: db
+#      DATABASE_PORT: 5432
+#      DATABASE_NAME: strapi
+#      DATABASE_USERNAME: strapi
+#      DATABASE_PASSWORD: strapi_password
+#    volumes:
+#      - ./strapi:/srv/app
+#    depends_on:
+#      - mysql
+
+  mysql:
+    image: mysql:8
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_DATABASE: strapi
+      MYSQL_USER: strapi
+      MYSQL_PASSWORD: strapi_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

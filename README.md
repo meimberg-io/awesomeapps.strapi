@@ -1,0 +1,5 @@
+# Strapi Docker Projekt
+
+Dieses Projekt enthält eine Strapi-Instanz, die in einem Docker-Container ausgeführt wird. Strapi ist ein Headless CMS, das es Entwicklern ermöglicht, APIs schnell zu erstellen und zu verwalten.
+
+## Projektstruktur
