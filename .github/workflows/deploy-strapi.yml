@@ -27,6 +27,9 @@ jobs:
         run: |
           echo "HOST=${{ vars.HOST }}" >> .env
           echo "PORT=${{ vars.PORT }}" >> .env
+          echo "SERVER_URL=${{ vars.SERVER_URL }}" >> .env
+          echo "ADMIN_URL=${{ vars.ADMIN_URL }}" >> .env
+          echo "PUBLIC_URL=${{ vars.PUBLIC_URL }}" >> .env
           echo "APP_KEYS=${{ secrets.APP_KEYS }}" >> .env
           echo "API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}" >> .env
           echo "ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}" >> .env
