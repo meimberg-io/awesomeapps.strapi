@@ -56,9 +56,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ssh_key
           chmod 600 ssh_key
           ssh-keyscan -H "$SERVER_HOSTNAME" >> ~/.ssh/known_hosts
-          echo "wutz1"
           rsync -avz --exclude 'node_modules' --exclude '.git' -e "ssh -i ssh_key" ./ "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
-          echo "wutz2"
-          echo "$SERVER_ROOTDIR"
-          ssh -i ssh_key "$SERVER_USER"@"$SERVER_HOSTNAME" 'cd /srv/strapi/app && pwd && ls -la && npm install && pwd && ls -la && npm run build && pm2 restart strapi'
+          echo "wuu $SERVER_ROOTDIR"
+          ssh -i ssh_key "$SERVER_USER"@"$SERVER_HOSTNAME" "cd \"$SERVER_ROOTDIR\" && pwd && ls -la && npm install && pwd && ls -la && npm run build && pm2 restart strapi"
           echo "wutz3"
