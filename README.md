@@ -11,6 +11,11 @@ nvm install 20
 
 ## Development
 
+### Configure
+```
+cp .env.develop .env
+```
+
 ### Start Database
 
 ```
