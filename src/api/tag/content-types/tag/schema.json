@@ -10,10 +10,20 @@
   "options": {
     "draftAndPublish": true
   },
-  "pluginOptions": {},
+  "pluginOptions": {
+    "graphql": {
+      "enabled": true
+    }
+  },
   "attributes": {
     "name": {
       "type": "string"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service",
+      "mappedBy": "tags"
     }
   }
 }
