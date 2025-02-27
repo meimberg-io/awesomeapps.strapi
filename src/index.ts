@@ -1,5 +1,3 @@
-// import type { Core } from '@strapi/strapi';
-
 export default {
     /**
      * An asynchronous register function that runs before
@@ -11,21 +9,42 @@ export default {
         const extension = ({nexus}) => ({
             typeDefs: `
                   extend type Tag {
-                    count: Int
+                    count(additionalTags: [ID!]): Int
                   }
                `,
             resolvers: {
                 Tag: {
                     count: {
                         resolve: async (parent, args, context) => {
-                            // Hier die Logik zur Berechnung des count-Werts einfügen
-                            // Beispiel:
-                            const relatedServices = await strapi.entityService.count('api::service.service', {
-                                filters: { tags: { id: parent.id } },
-                            });
-                            //const relatedArticles = 199;
+                            const additionalTags = args.additionalTags || [];  // Sicherstellen, dass der Parameter existiert
 
-                            return relatedServices;
+                            const tagIds = additionalTags ? [parent.documentId, ...additionalTags] : [parent.documentId];
+
+                            console.log("Tag-IDs: ", tagIds)
+
+                            const requiredTagCount = tagIds.length;
+
+                            const subquery = strapi.db.connection('services as s')
+                                .join('services_tags_lnk as st', 's.id', 'st.service_id')
+                                .join('tags as t', 'st.tag_id', 't.id')
+                                .whereNotNull('s.published_at')  // Services müssen veröffentlicht sein
+                                .whereNotNull('t.published_at')  // Tags müssen veröffentlicht sein
+                                .whereIn('t.document_id', tagIds)
+                                .groupBy('s.id')
+                                .havingRaw('COUNT(DISTINCT st.tag_id) = ?', [requiredTagCount])
+                                .select('s.id');  // Wichtiger Fix: Hier nur die ID zurückgeben
+
+                            const serviceCountQuery =  strapi.db.connection
+                                .from(subquery.as('subquery'))  // Wrappe die Subquery
+                                .count('* as total')
+                                .first();
+
+                            console.log('Generated SQL:', serviceCountQuery.toSQL().toNative());
+
+                            const serviceCount = await serviceCountQuery;
+                            return serviceCount ? serviceCount.total : 0;
+
+                            return serviceCount;
                         },
                     },
                 },
