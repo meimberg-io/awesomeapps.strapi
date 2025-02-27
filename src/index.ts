@@ -18,7 +18,7 @@ export default {
                         resolve: async (parent, args, context) => {
                             const additionalTags = args.additionalTags || [];  // Sicherstellen, dass der Parameter existiert
 
-                            const tagIds = additionalTags ? [parent.documentId, ...additionalTags] : [parent.documentId];
+                            const tagIds = [...new Set([parent.documentId, ...additionalTags])];
 
                             console.log("Tag-IDs: ", tagIds)
 
