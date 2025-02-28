@@ -6,11 +6,17 @@ export default {
      * This gives you an opportunity to extend code.
      */
     register({strapi}) {
+
+        strapi.log.info("Strapi wird gestartet...");
+        strapi.log.debug("DEBUG: Strapi ist jetzt im Debug-Modus aktiv!");
         const extension = ({nexus}) => ({
             typeDefs: `
                   extend type Tag {
-                    count(additionalTags: [ID!]): Int
-                  }
+                    count(additionalTags: [ID]!): Int
+                  },
+                   type Query {
+                      services(tags: [ID]!): [Service]
+                  }           
                `,
             resolvers: {
                 Tag: {
@@ -20,7 +26,7 @@ export default {
 
                             const tagIds = [...new Set([parent.documentId, ...additionalTags])];
 
-                            console.log("Tag-IDs: ", tagIds)
+                            //console.log("Tag-IDs: ", tagIds)
 
                             const requiredTagCount = tagIds.length;
 
@@ -39,7 +45,7 @@ export default {
                                 .count('* as total')
                                 .first();
 
-                            console.log('Generated SQL:', serviceCountQuery.toSQL().toNative());
+                            //console.log('Generated SQL:', serviceCountQuery.toSQL().toNative());
 
                             const serviceCount = await serviceCountQuery;
                             return serviceCount ? serviceCount.total : 0;
@@ -48,6 +54,24 @@ export default {
                         },
                     },
                 },
+                Query: {
+                    services: {
+
+                        async resolve(parent, args, context) {
+                            const {tags} = args;
+
+
+                            const services = await strapi.entityService.findMany("api::service.service", {
+                                populate: {tags: true},
+                            });
+
+                            return tags.length == 0 ? services : services.filter(service => {
+                                const serviceTagIds = service.tags.map((tag: any) => tag.documentId);
+                                return tags.every((tagId: string) => serviceTagIds.includes(tagId));
+                            });
+                        }
+                    }
+                }
             }
         })
 
