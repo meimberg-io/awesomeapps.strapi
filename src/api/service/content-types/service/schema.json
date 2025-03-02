@@ -49,18 +49,13 @@
     "longdesc": {
       "type": "blocks"
     },
-    "longdescription": {
-      "type": "blocks"
-    },
-    "descriptionlong": {
-      "type": "richtext"
-    },
     "screenshots": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
       "allowedTypes": [
         "images"
-      ],
-      "type": "media",
-      "multiple": true
+      ]
     }
   }
 }
