@@ -558,6 +558,9 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     logo: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     longdesc: Schema.Attribute.Blocks;
+    longdescription: Schema.Attribute.DynamicZone<
+      ['shared.slider', 'shared.rich-text', 'shared.quote', 'shared.media']
+    >;
     name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     screenshots: Schema.Attribute.Media<'images', true>;

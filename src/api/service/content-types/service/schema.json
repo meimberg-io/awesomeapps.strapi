@@ -56,6 +56,15 @@
       "allowedTypes": [
         "images"
       ]
+    },
+    "longdescription": {
+      "type": "dynamiczone",
+      "components": [
+        "shared.slider",
+        "shared.rich-text",
+        "shared.quote",
+        "shared.media"
+      ]
     }
   }
 }
