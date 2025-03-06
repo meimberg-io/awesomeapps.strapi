@@ -26,7 +26,6 @@ export default {
 
                             const tagIds = [...new Set([parent.documentId, ...additionalTags])];
 
-                            //console.log("Tag-IDs: ", tagIds)
 
                             const requiredTagCount = tagIds.length;
 
