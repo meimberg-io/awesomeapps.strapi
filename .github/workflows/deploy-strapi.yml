@@ -68,7 +68,6 @@ jobs:
             --exclude=.ssh \
             --exclude=.git \
             --exclude=.github \
-            --exclude=.env* \
             --exclude=.cache \
             --exclude=.tmp \
             --exclude=logs \
