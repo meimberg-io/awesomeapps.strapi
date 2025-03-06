@@ -15,7 +15,7 @@ export default {
                     count(additionalTags: [ID]!): Int
                   },
                    type Query {
-                      services(tags: [ID]!): [Service]
+                      servicesbytags(tags: [ID]!): [Service]
                   }           
                `,
             resolvers: {
@@ -55,7 +55,7 @@ export default {
                     },
                 },
                 Query: {
-                    services: {
+                    servicesbytags: {
 
                         async resolve(parent, args, context) {
                             const {tags} = args;
@@ -72,10 +72,19 @@ export default {
                         }
                     }
                 }
-            }
+            },
+            resolversConfig: {
+                "Query.servicesbytags": {
+                    auth: false,
+                    policies: ["global::servicesbytags"],
+                    resolverOf: 'api::service.services.find',
+                },
+            },
+
         })
 
         strapi.plugin('graphql').service('extension').use(extension)
+
     },
     /**
      * An asynchronous bootstrap function that runs before

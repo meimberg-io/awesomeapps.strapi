@@ -567,6 +567,7 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     screenshots: Schema.Attribute.Media<'images', true>;
+    slug: Schema.Attribute.UID<'name'>;
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>;
     thumbnail: Schema.Attribute.Media<'images'>;
     updatedAt: Schema.Attribute.DateTime;
