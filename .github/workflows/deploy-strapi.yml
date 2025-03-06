@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - mone
+      - master
 
 jobs:
   deploy:
@@ -55,11 +55,30 @@ jobs:
           SERVER_HOSTNAME: ${{ secrets.SERVER_HOSTNAME }}
           SERVER_ROOTDIR: ${{ vars.SERVER_ROOTDIR }}
         run: |
+          
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ssh_key
-          chmod 600 ssh_key
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/ssh_key
+          chmod 600 ~/.ssh/ssh_key
           ssh-keyscan -H "$SERVER_HOSTNAME" >> ~/.ssh/known_hosts
-          rsync -avz --exclude 'node_modules' --exclude 'node_modules' --exclude 'data/uploads' --exclude '.git' --delete -e "ssh -i ssh_key" ./ "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
-          echo "wuu $SERVER_ROOTDIR"
-          ssh -i ssh_key "$SERVER_USER"@"$SERVER_HOSTNAME" "cd \"$SERVER_ROOTDIR\" && pwd && ls -la && npm install && pwd && ls -la && npm run build && pm2 restart strapi"
-          echo "wutz3"
+          #rsync -avz --exclude 'node_modules' --exclude 'node_modules' --exclude 'data' --exclude '.git' --delete -e "ssh -i ssh_key" ./ "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
+          rsync -avz --exclude 'node_modules'  --exclude 'public/uploads' --exclude '.git' --delete -e "ssh -i ssh_key" ./ "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
+          
+          rsync -avz --delete \
+            --exclude=node_modules \
+            --exclude=.ssh \
+            --exclude=.git \
+            --exclude=.github \
+            --exclude=.env* \
+            --exclude=.cache \
+            --exclude=.tmp \
+            --exclude=logs \
+            --exclude=database \
+            --exclude=data \
+            --exclude=src \
+            --exclude=public/uploads \
+            -e "ssh -i ssh_key" ./ \
+            "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
+          
+          #ssh -i ssh_key "$SERVER_USER"@"$SERVER_HOSTNAME" "cd \"$SERVER_ROOTDIR\" && pwd && ls -la && npm install && pwd && ls -la && npm run build && pm2 restart strapi"
+          ssh -i ~/.ssh/ssh_key "$SERVER_USER"@"$SERVER_HOSTNAME" "cd \"$SERVER_ROOTDIR\" && pm2 restart strapi"
+          echo "Wutz!"
