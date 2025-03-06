@@ -65,6 +65,10 @@
         "shared.quote",
         "shared.media"
       ]
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name"
     }
   }
 }
