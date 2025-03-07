@@ -549,10 +549,12 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    articlecontent: Schema.Attribute.DynamicZone<
+      ['shared.slider', 'shared.rich-text', 'shared.quote', 'shared.media']
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -560,13 +562,12 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     logo: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
-    longdesc: Schema.Attribute.Blocks;
-    longdescription: Schema.Attribute.DynamicZone<
-      ['shared.slider', 'shared.rich-text', 'shared.quote', 'shared.media']
-    >;
+    longdescription: Schema.Attribute.Blocks;
     name: Schema.Attribute.String;
+    pricing: Schema.Attribute.RichText;
     publishedAt: Schema.Attribute.DateTime;
     screenshots: Schema.Attribute.Media<'images', true>;
+    shortdescription: Schema.Attribute.Text;
     slug: Schema.Attribute.UID<'name'>;
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>;
     thumbnail: Schema.Attribute.Media<'images'>;

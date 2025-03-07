@@ -8,6 +8,10 @@ const plugins = {
             maxLimit: 200, // Maximales Abfrageergebnis
         },
     },
+    "content-manager": {
+        enabled: true,
+        // Hier ggf. weitere Einstellungen, falls benötigt.
+    },
 
 };
 
