@@ -22,11 +22,9 @@ export default {
                 Tag: {
                     count: {
                         resolve: async (parent, args, context) => {
-                            const additionalTags = args.additionalTags || [];  // Sicherstellen, dass der Parameter existiert
 
+                            const additionalTags = args.additionalTags || [];
                             const tagIds = [...new Set([parent.documentId, ...additionalTags])];
-
-
                             const requiredTagCount = tagIds.length;
 
                             const subquery = strapi.db.connection('services as s')
