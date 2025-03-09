@@ -15,7 +15,7 @@ export default {
                     count(additionalTags: [ID]!): Int
                   },
                    type Query {
-                      servicesbytags(tags: [ID]!): [Service]
+                servicesbytags(tags: [ID]!, sort: String): [Service]
                   }           
                `,
             resolvers: {
@@ -55,16 +55,21 @@ export default {
                     servicesbytags: {
 
                         async resolve(parent, args, context) {
-                            const {tags} = args;
+                            const {tags, sort} = args;
 
+                            const queryOptions = {
+                                populate: { tags: true },
+                                ...(sort && { orderBy: sort.split(",").map((s) => {
+                                        const [field, direction] = s.trim().split(":");
+                                        return { [field]: direction === "desc" ? "desc" : "asc" };
+                                    })}),
+                            };
 
-                            const services = await strapi.entityService.findMany("api::service.service", {
-                                populate: {tags: true},
-                            });
+                            const services = await strapi.entityService.findMany("api::service.service", queryOptions);
 
-                            return tags.length == 0 ? services : services.filter(service => {
-                                const serviceTagIds = service.tags.map((tag: any) => tag.documentId);
-                                return tags.every((tagId: string) => serviceTagIds.includes(tagId));
+                            return tags.length === 0 ? services : services.filter(service => {
+                                const serviceTagIds = service.tags.map((tag) => tag.documentId);
+                                return tags.every((tagId) => serviceTagIds.includes(tagId));
                             });
                         }
                     }
