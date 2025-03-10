@@ -508,6 +508,7 @@ export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
 export interface ApiNewServiceNewService extends Struct.CollectionTypeSchema {
   collectionName: 'new_services';
   info: {
+    description: '';
     displayName: 'New Service';
     pluralName: 'new-services';
     singularName: 'new-service';
@@ -525,6 +526,8 @@ export interface ApiNewServiceNewService extends Struct.CollectionTypeSchema {
       'api::new-service.new-service'
     > &
       Schema.Attribute.Private;
+    n8nstatus: Schema.Attribute.Enumeration<['new', 'pending', 'finished']> &
+      Schema.Attribute.DefaultTo<'new'>;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID;
     updatedAt: Schema.Attribute.DateTime;

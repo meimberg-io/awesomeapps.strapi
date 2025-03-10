@@ -4,7 +4,8 @@
   "info": {
     "singularName": "new-service",
     "pluralName": "new-services",
-    "displayName": "New Service"
+    "displayName": "New Service",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -12,6 +13,15 @@
   "attributes": {
     "slug": {
       "type": "uid"
+    },
+    "n8nstatus": {
+      "type": "enumeration",
+      "enum": [
+        "new",
+        "pending",
+        "finished"
+      ],
+      "default": "new"
     }
   }
 }
