@@ -1,0 +1,17 @@
+{
+  "kind": "collectionType",
+  "collectionName": "new_services",
+  "info": {
+    "singularName": "new-service",
+    "pluralName": "new-services",
+    "displayName": "New Service"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "slug": {
+      "type": "uid"
+    }
+  }
+}
