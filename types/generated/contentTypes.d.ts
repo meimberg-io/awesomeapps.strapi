@@ -526,7 +526,9 @@ export interface ApiNewServiceNewService extends Struct.CollectionTypeSchema {
       'api::new-service.new-service'
     > &
       Schema.Attribute.Private;
-    n8nstatus: Schema.Attribute.Enumeration<['new', 'pending', 'finished']> &
+    n8nstatus: Schema.Attribute.Enumeration<
+      ['new', 'pending', 'finished', 'error']
+    > &
       Schema.Attribute.DefaultTo<'new'>;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID;

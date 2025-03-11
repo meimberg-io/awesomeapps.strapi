@@ -19,7 +19,8 @@
       "enum": [
         "new",
         "pending",
-        "finished"
+        "finished",
+        "error"
       ],
       "default": "new"
     }
