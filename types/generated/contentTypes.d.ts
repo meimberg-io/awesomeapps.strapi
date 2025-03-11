@@ -478,12 +478,15 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    abstract: Schema.Attribute.Text;
     articlecontent: Schema.Attribute.DynamicZone<
       ['shared.slider', 'shared.rich-text', 'shared.quote', 'shared.media']
     >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    description: Schema.Attribute.RichText;
+    functionality: Schema.Attribute.RichText;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -496,7 +499,7 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     pricing: Schema.Attribute.RichText;
     publishedAt: Schema.Attribute.DateTime;
     screenshots: Schema.Attribute.Media<'images', true>;
-    shortdescription: Schema.Attribute.Text;
+    shortfacts: Schema.Attribute.Text;
     slug: Schema.Attribute.UID<'name'>;
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>;
     thumbnail: Schema.Attribute.Media<'images'>;
