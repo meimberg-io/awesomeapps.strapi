@@ -11,9 +11,6 @@
     "draftAndPublish": true
   },
   "attributes": {
-    "slug": {
-      "type": "uid"
-    },
     "n8nstatus": {
       "type": "enumeration",
       "enum": [
@@ -23,6 +20,9 @@
         "error"
       ],
       "default": "new"
+    },
+    "slug": {
+      "type": "string"
     }
   }
 }
