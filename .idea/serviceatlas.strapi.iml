@@ -9,5 +9,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="serviceatlas.frontend" />
+    <orderEntry type="module" module-name="io.meimberg.n8n" />
   </component>
 </module>
