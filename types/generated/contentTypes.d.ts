@@ -507,6 +507,8 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     url: Schema.Attribute.String;
+    youtube_title: Schema.Attribute.String;
+    youtube_video: Schema.Attribute.String;
   };
 }
 

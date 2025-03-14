@@ -81,6 +81,12 @@
     },
     "shortfacts": {
       "type": "text"
+    },
+    "youtube_video": {
+      "type": "string"
+    },
+    "youtube_title": {
+      "type": "string"
     }
   }
 }
