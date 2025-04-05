@@ -12,9 +12,9 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/plugin-cloud": "5.8.0",
-    "@strapi/plugin-graphql": "^5.10.2",
-    "@strapi/plugin-users-permissions": "5.8.0",
+    "@strapi/plugin-cloud": "5.12.3",
+    "@strapi/plugin-graphql": "^5.12.3",
+    "@strapi/plugin-users-permissions": "5.12.3",
     "@types/react-select": "^5.0.0",
     "fs-extra": "^10.0.0",
     "mime-types": "^2.1.27",
@@ -27,8 +27,8 @@
     "styled-components": "^6.0.0"
   },
   "devDependencies": {
-    "@strapi/strapi": "^5.10.2",
-    "@strapi/types": "^5.10.2",
+    "@strapi/strapi": "^5.12.3",
+    "@strapi/types": "^5.12.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
