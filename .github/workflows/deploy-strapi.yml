@@ -67,8 +67,7 @@ jobs:
           
           echo "Starting rsync"
            
-          rsync -avz --delete \
-            --exclude=node_modules \
+          rsync -avz --delete \            
             --exclude=.ssh \
             --exclude=.git \
             --exclude=.github \
