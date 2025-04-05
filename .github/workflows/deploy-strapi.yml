@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Remove lockfile
+      - name: Install Dependencies
         run: |
           rm -f package-lock.json
 
@@ -67,7 +67,8 @@ jobs:
           
           echo "Starting rsync"
            
-          rsync -avz --delete \            
+          rsync -avz --delete \
+            --exclude=node_modules \
             --exclude=.ssh \
             --exclude=.git \
             --exclude=.github \
