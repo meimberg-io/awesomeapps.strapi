@@ -68,14 +68,14 @@ jobs:
           echo "Starting rsync"
            
           rsync -avz --delete \
-            --exclude=.ssh \
-            --exclude=.git \
-            --exclude=.github \
-            --exclude=.cache \
-            --exclude=.tmp \
-            --exclude=logs \
-            --exclude=database \
-            --exclude=data \
+            --exclude=/.ssh \
+            --exclude=/.git \
+            --exclude=/.github \
+            --exclude=/.cache \
+            --exclude=/.tmp \
+            --exclude=/logs \
+            --exclude=/database \
+            --exclude=/data \
             --exclude=/src \
             --exclude=public/uploads \
             -e "ssh -i ~/.ssh/ssh_key" "${GITHUB_WORKSPACE}/" "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
