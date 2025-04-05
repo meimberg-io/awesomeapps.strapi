@@ -67,7 +67,7 @@ jobs:
           
           echo "Starting rsync"
            
-          rsync -avz --delete \            
+          rsync -avz --progress --stats --human-readable -vvv --delete \            
             --exclude=.ssh \
             --exclude=.git \
             --exclude=.github \
