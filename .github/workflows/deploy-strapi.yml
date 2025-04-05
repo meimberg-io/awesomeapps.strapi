@@ -75,12 +75,10 @@ jobs:
             --exclude=.tmp \
             --exclude=logs \
             --exclude=database \
-            --exclude=node_modules \
             --exclude=data \
             --exclude=/src \
             --exclude=public/uploads \
-            -e "ssh -i ~/.ssh/ssh_key" "${GITHUB_WORKSPACE}/" \
-            "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
+            -e "ssh -i ~/.ssh/ssh_key" "${GITHUB_WORKSPACE}/" "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
           
           ssh -i ~/.ssh/ssh_key "$SERVER_USER"@"$SERVER_HOSTNAME" "cd \"$SERVER_ROOTDIR\" && pm2 restart strapi"
           echo "Wutz!"
