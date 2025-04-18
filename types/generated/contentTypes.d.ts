@@ -497,12 +497,14 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     longdescription: Schema.Attribute.Blocks;
     name: Schema.Attribute.String;
     pricing: Schema.Attribute.RichText;
+    publishdate: Schema.Attribute.Date;
     publishedAt: Schema.Attribute.DateTime;
     screenshots: Schema.Attribute.Media<'images', true>;
     shortfacts: Schema.Attribute.Text;
     slug: Schema.Attribute.UID<'name'>;
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>;
     thumbnail: Schema.Attribute.Media<'images'>;
+    top: Schema.Attribute.Boolean;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

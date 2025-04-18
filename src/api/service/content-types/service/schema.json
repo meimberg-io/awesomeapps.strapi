@@ -87,6 +87,12 @@
     },
     "youtube_title": {
       "type": "string"
+    },
+    "publishdate": {
+      "type": "date"
+    },
+    "top": {
+      "type": "boolean"
     }
   }
 }
