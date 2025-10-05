@@ -1,107 +1,145 @@
-# Serviceatlas Strapi
+# ServiceAtlas Strapi CMS
 
-## Development Setup
+A Strapi headless CMS for ServiceAtlas project management.
 
-### Requirements (local)
-```
-nvm install 20
-```
-### Configure porject
-```
-cp .env.develop .env
-```
-### Start Database
-```
-docker-compose up --build
-```
-### Howto
+## Quick Start
 
-```
+### Local Development
+```bash
 npm install
-npm run develop
+npm run dev
 ```
+Open [http://localhost:1337](http://localhost:1337)
 
-## Setup Production
+### Docker Development
 ```bash
-sudo apt update && sudo apt upgrade
-
-# nvm & node
-
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-
-nvm install 20
-
-# mysql
-
-sudo apt install mysql-server mysql-client
-ESC[200~sudo mysql_secure_installation
-sudo mysql_secure_installation
-mysql
-
-# user strapi
-
-adduser strapi
-mkdir /srv/strapi
-useradd -d /srv/strapi -s /bin/bash strapi
-su - strapi
-pwd
-chown -R strapi.strapi /srv/strapi/
-chown -R strapi:strapi /srv/strapi/
-
-# pm2
-
-su - strapi
-npm install pm2 -g
-
-# nginx
-
-apt install nginx certbot python3-certbot-nginx
-vim /etc/nginx/sites-available/strapi
-ln -s /etc/nginx/sites-available/strapi /etc/nginx/sites-enabled/
-nginx -t
-systemctl reload nginx
-vim /etc/nginx/sites-available/strapi
-
+docker-compose --profile dev --profile database up --build
 ```
-    server {
-        #    location ~ ^/(admin|api|content-manager) {
-        location /strapi/ {
-            proxy_pass http://localhost:1337;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_cache_bypass $http_upgrade;
-    
-            client_max_body_size 500M;
-    
-            rewrite ^/strapi(/.*)$ $1 break;
-        }
-    
-        listen 443 ssl; # managed by Certbot
-        ssl_certificate /etc/letsencrypt/live/serviceatlas.meimberg.io/fullchain.pem; # managed by Certbot
-        ssl_certificate_key /etc/letsencrypt/live/serviceatlas.meimberg.io/privkey.pem; # managed by Certbot
-        include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-    
-    }
-    server {
-        if ($host = serviceatlas.meimberg.io) {
-            return 301 https://$host$request_uri;
-        } # managed by Certbot        
-        
-        listen 80;
-        server_name serviceatlas.meimberg.io;
-        return 404; # managed by Certbot
-    }
-    
-```bash
-certbot --nginx -d serviceatlas.meimberg.io
-```
-
+Open [http://localhost:8202](http://localhost:8202)
 
 ## Deployment
 
+### Prerequisites
+1. **Server Setup** (one-time):
+   ```bash
+   # Run on your server once
+   curl -fsSL https://raw.githubusercontent.com/meimberg-io/io.meimberg.serversetup/main/scripts/server-setup.sh | sudo bash
+   ```
 
+2. **GitHub Configuration**:
+   - **Variables**: `APP_PORT`, `HOST`, `USERNAME`
+   - **Secrets**: `SSH_PRIVATE_KEY`
+
+### Deploy
+Push to `master` branch → automatic deployment via GitHub Actions
+
+## Project Structure
+
+```
+├── config/           # Strapi configuration files
+├── src/
+│   ├── api/          # API routes and controllers
+│   ├── components/   # Reusable components
+│   └── policies/     # Custom policies
+├── public/           # Static files and uploads
+├── database/         # Database migrations
+├── docker-compose.yml # Unified dev/prod config
+├── Dockerfile        # Multi-stage build
+└── .github/workflows/ # CI/CD pipeline
+```
+
+## Tech Stack
+
+- **Framework**: Strapi 5.12.3
+- **Database**: MySQL 8.0
+- **Language**: TypeScript
+- **Deployment**: Docker + GitHub Actions
+
+## Development
+
+### Available Scripts
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run linting (placeholder)
+npm run test         # Run tests (placeholder)
+npm run test:ci      # Run tests with CI (placeholder)
+```
+
+### Docker Profiles
+```bash
+# Development (with volume mounts + database)
+docker-compose --profile dev --profile database up
+
+# Production (no volume mounts + database)
+docker-compose --profile prod --profile database up
+
+# Database only
+docker-compose --profile database up
+```
+
+## Environment Variables
+
+### Local (.env)
+```bash
+NODE_ENV=development
+APP_PORT=8202
+DATABASE_CLIENT=mysql
+DATABASE_HOST=mysql
+DATABASE_PORT=3306
+DATABASE_NAME=strapi
+DATABASE_USERNAME=strapi
+DATABASE_PASSWORD=strapi_password
+```
+
+### Production (auto-generated)
+```bash
+NODE_ENV=production
+APP_PORT=<from GitHub variable>
+PORT=1337
+# ... database and app keys
+```
+
+## Database
+
+### MySQL Configuration
+- **Host**: `mysql` (Docker) or `localhost` (local)
+- **Port**: `3306`
+- **Database**: `strapi`
+- **User**: `strapi`
+- **Password**: `strapi_password`
+
+### Required App Keys
+Strapi requires these environment variables:
+- `APP_KEYS` - Comma-separated keys for app encryption
+- `API_TOKEN_SALT` - Salt for API token generation
+- `ADMIN_JWT_SECRET` - Secret for admin JWT tokens
+- `TRANSFER_TOKEN_SALT` - Salt for transfer tokens
+- `JWT_SECRET` - Secret for JWT tokens
+
+## Content Types
+
+- **Global** - Global site settings
+- **Service** - Individual services
+- **Page** - Static pages
+- **Tag** - Service tags
+- **New Service** - Service creation requests
+
+## API Endpoints
+
+- **Admin Panel**: `/admin`
+- **API**: `/api`
+- **GraphQL**: `/graphql` (if enabled)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test locally with Docker
+5. Submit a pull request
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
