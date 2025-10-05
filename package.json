@@ -9,7 +9,11 @@
     "develop": "strapi develop",
     "seed:example": "node ./scripts/seed.js",
     "start": "strapi start",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "dev": "strapi develop",
+    "lint": "echo 'No linting configured'",
+    "test": "echo 'No tests configured'",
+    "test:ci": "echo 'No tests configured'"
   },
   "dependencies": {
     "@strapi/plugin-cloud": "5.12.3",
