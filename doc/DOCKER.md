@@ -182,7 +182,8 @@ The mapping works as: `APP_PORT:PORT` → `8202:1337` means external port 8202 m
 - **Development Admin**: http://localhost:1337/admin
 - **Production Admin**: http://localhost:8202/admin (or configured port)
 - **API**: http://localhost:1337/api (or 8202 for prod)
-- **MySQL**: localhost:3306
+
+**Note:** MySQL is only accessible within the Docker network (not exposed to host) for security.
 
 ## Database Volumes
 
