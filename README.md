@@ -23,7 +23,7 @@ See [Docker Guide](doc/DOCKER.md) for more details.
 
 - **[Docker Setup](doc/DOCKER.md)** - How to run with Docker Compose
 - **[GitHub Actions Setup](doc/GITHUB-SETUP.md)** - Configure deployment pipeline
-- **[Pull Live Data](doc/PULL-LIVE.md)** - Sync data from production
+- **[Data Transfer](doc/DATA-TRANSFER.md)** - Sync data between local and production
 
 ## Deployment
 
@@ -45,6 +45,7 @@ npm run dev          # Start development server
 npm run build        # Build for production
 npm run start        # Start production server
 npm run pull-live    # Pull data from live site
+npm run push-live    # Push data to live site ⚠️
 ```
 
 ## Environment Variables

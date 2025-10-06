@@ -1,6 +1,11 @@
-# Pull Live Data
+# Data Transfer Scripts
 
-This document explains how to pull data from your live Strapi instance to your local development environment.
+This document explains how to transfer data between your local development environment and your live Strapi instance.
+
+## Available Commands
+
+- **`npm run pull-live`** - Download data FROM live server TO local
+- **`npm run push-live`** - Upload data FROM local TO live server ⚠️
 
 ## Setup
 
@@ -19,13 +24,15 @@ STRAPI_LIVE_TOKEN=your-actual-transfer-token-here
 
 ## Usage
 
-### Option 1: Using npm script (recommended)
+### Pull Live Data (Download from live to local)
+
+#### Option 1: Using npm script (recommended)
 
 ```bash
 npm run pull-live
 ```
 
-### Option 2: Using helper scripts
+#### Option 2: Using helper scripts
 
 **Windows (PowerShell):**
 ```powershell
@@ -36,6 +43,29 @@ npm run pull-live
 ```bash
 chmod +x scripts/pull-live.sh
 ./scripts/pull-live.sh
+```
+
+### Push Live Data (Upload from local to live) ⚠️ DANGER
+
+**⚠️ WARNING:** This will OVERWRITE all data on the live server with your local data!
+
+#### Option 1: Using npm script (recommended)
+
+```bash
+npm run push-live
+```
+
+#### Option 2: Using helper scripts
+
+**Windows (PowerShell):**
+```powershell
+.\scripts\push-live.ps1
+```
+
+**Unix/Linux/Mac:**
+```bash
+chmod +x scripts/push-live.sh
+./scripts/push-live.sh
 ```
 
 The helper scripts automatically load the `.env` file and validate that the required variables are set.
