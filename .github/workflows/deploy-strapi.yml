@@ -79,11 +79,12 @@ jobs:
             
             echo "Created .env file"
             
-            # Clone the repository on the server
+            # Clone the repository on the server using GitHub token
             rm -rf temp-deploy
-            git clone --depth 1 https://github.com/${{ github.repository }}.git temp-deploy
-            cp -r temp-deploy/* ./
-            cp -r temp-deploy/.* ./ 2>/dev/null || true
+            git clone --depth 1 https://x-access-token:${{ secrets.GH_DEPLOY_TOKEN }}@github.com/${{ github.repository }}.git temp-deploy
+            
+            # Copy files excluding .git directory
+            rsync -av --exclude='.git' temp-deploy/ ./
             rm -rf temp-deploy
             
             # Deploy using docker-compose with production profile

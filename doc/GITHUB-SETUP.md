@@ -11,6 +11,11 @@ These are sensitive values that should never be committed to the repository:
   - Generate with: `ssh-keygen -t ed25519 -C "github-deploy"`
   - Copy the **private key** content (the file WITHOUT .pub extension)
 
+- **`GH_DEPLOY_TOKEN`**: GitHub Personal Access Token for cloning the repository
+  - Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+  - Generate new token with `repo` scope (read access to private repositories)
+  - Copy the token value
+
 ### Database Password
 - **`DATABASE_PASSWORD`**: MySQL user password
   - Generate a strong password
@@ -75,14 +80,15 @@ These are non-sensitive configuration values:
 
 ## Summary
 
-**Secrets Required: 7**
+**Secrets Required: 8**
 1. SSH_PRIVATE_KEY
-2. DATABASE_PASSWORD
-3. APP_KEYS
-4. API_TOKEN_SALT
-5. ADMIN_JWT_SECRET
-6. TRANSFER_TOKEN_SALT
-7. JWT_SECRET
+2. GH_DEPLOY_TOKEN
+3. DATABASE_PASSWORD
+4. APP_KEYS
+5. API_TOKEN_SALT
+6. ADMIN_JWT_SECRET
+7. TRANSFER_TOKEN_SALT
+8. JWT_SECRET
 
 **Variables Required: 11**
 1. HOST
