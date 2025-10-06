@@ -1,12 +1,45 @@
 #!/usr/bin/env node
 /**
  * Push data to live Strapi instance
- * This script loads environment variables from .env and runs the transfer command
+ * This script detects if running in Docker and executes accordingly
  */
 
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+
+// Check if running inside Docker container
+const isInDocker = fs.existsSync('/.dockerenv') || fs.existsSync('/run/.containerenv');
+
+// If not in Docker, try to run inside the Docker container
+if (!isInDocker) {
+  console.log('🐳 Detected local environment, running command inside Docker container...');
+  console.log('');
+  
+  try {
+    // Check if strapi-dev container is running
+    execSync('docker ps --filter "name=strapi-dev" --filter "status=running" --format "{{.Names}}"', { 
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe']
+    }).trim();
+    
+    // Run the command inside the container
+    execSync('docker exec -it strapi-dev npm run push-live', { 
+      stdio: 'inherit',
+      cwd: path.join(__dirname, '..')
+    });
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error: strapi-dev container is not running!');
+    console.error('');
+    console.error('Please start the container first:');
+    console.error('  docker-compose up -d');
+    console.error('');
+    console.error('Then try again:');
+    console.error('  npm run push-live');
+    process.exit(1);
+  }
+}
 
 // Load .env file
 const envPath = path.join(__dirname, '..', '.env');
