@@ -10,6 +10,7 @@
     "seed:example": "node ./scripts/seed.js",
     "start": "strapi start",
     "strapi": "strapi",
+    "pull-live": "node scripts/pull-live.js",
     "dev": "strapi develop",
     "lint": "echo 'No linting configured'",
     "test": "echo 'No tests configured'",

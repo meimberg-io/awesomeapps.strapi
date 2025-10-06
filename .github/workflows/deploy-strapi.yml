@@ -7,78 +7,101 @@ on:
       - master
 
 jobs:
-  deploy:
+  lint:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install Dependencies
-        run: |
-          rm -f package-lock.json
+        run: npm ci
 
-      - name: Install Dependencies
-        run: |
-          npm install
+      - name: Run Linter
+        run: npm run lint
 
-      - name: Create .env file
-        run: |
-          echo "HOST=${{ vars.HOST }}" >> .env
-          echo "PORT=${{ vars.PORT }}" >> .env
-          echo "SERVER_URL=${{ vars.SERVER_URL }}" >> .env
-          echo "ADMIN_URL=${{ vars.ADMIN_URL }}" >> .env
-          echo "PUBLIC_URL=${{ vars.PUBLIC_URL }}" >> .env
-          echo "APP_KEYS=${{ secrets.APP_KEYS }}" >> .env
-          echo "API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}" >> .env
-          echo "ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}" >> .env
-          echo "TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}" >> .env
-          echo "DATABASE_CLIENT=${{ vars.DATABASE_CLIENT }}" >> .env
-          echo "DATABASE_HOST=${{ vars.DATABASE_HOST }}" >> .env
-          echo "DATABASE_PORT=${{ vars.DATABASE_PORT }}" >> .env
-          echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
-          echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> .env
-          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
-          echo "DATABASE_FILENAME=" >> .env
-          echo "DATABASE_SSL=${{ vars.DATABASE_SSL }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+  deploy:
+    needs: lint
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
 
-      - name: Build Strapi
-        run: |
-          npm run build
-
+    steps:
       - name: Deploy to Server
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-          SERVER_HOSTNAME: ${{ secrets.SERVER_HOSTNAME }}
-          SERVER_ROOTDIR: ${{ vars.SERVER_ROOTDIR }}
-        run: |
-          
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/ssh_key
-          chmod 600 ~/.ssh/ssh_key
-          ssh-keyscan -H "$SERVER_HOSTNAME" >> ~/.ssh/known_hosts
-          
-          echo "Starting rsync"
-           
-          rsync -avz --delete \
-            --exclude=/.ssh \
-            --exclude=/.git \
-            --exclude=/.github \
-            --exclude=/.cache \
-            --exclude=/.tmp \
-            --exclude=/logs \
-            --exclude=/database \
-            --exclude=/data \
-            --exclude=/src \
-            --exclude=public/uploads \
-            -e "ssh -i ~/.ssh/ssh_key" "${GITHUB_WORKSPACE}/" "$SERVER_USER"@"$SERVER_HOSTNAME":"$SERVER_ROOTDIR"
-          
-          ssh -i ~/.ssh/ssh_key "$SERVER_USER"@"$SERVER_HOSTNAME" "cd \"$SERVER_ROOTDIR\" && pm2 restart strapi"
-          echo "Wutz!"
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ vars.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            # Strapi-specific deployment
+            APP_NAME="serviceatlas-strapi"
+            
+            # Create application directory in /opt/
+            APP_DIR="/opt/$APP_NAME"
+            mkdir -p $APP_DIR
+            
+            cd $APP_DIR
+            
+            # Create production environment file
+            echo "Creating .env for production"
+            cat > .env << EOF
+            NODE_ENV=production
+            APP_PORT=${{ vars.APP_PORT }}
+            
+            # Server
+            HOST=0.0.0.0
+            PORT=1337
+            SERVER_URL=${{ vars.SERVER_URL }}
+            PUBLIC_URL=${{ vars.PUBLIC_URL }}
+            ADMIN_URL=${{ vars.ADMIN_URL }}
+            
+            # Database
+            DATABASE_CLIENT=${{ vars.DATABASE_CLIENT }}
+            DATABASE_HOST=${{ vars.DATABASE_HOST }}
+            DATABASE_PORT=${{ vars.DATABASE_PORT }}
+            DATABASE_NAME=${{ vars.DATABASE_NAME }}
+            DATABASE_USERNAME=${{ vars.DATABASE_USERNAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_SSL=false
+            
+            # Secrets
+            APP_KEYS=${{ secrets.APP_KEYS }}
+            API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}
+            ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}
+            TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            EOF
+            
+            echo "Created .env file"
+            
+            # Clone the repository on the server
+            rm -rf temp-deploy
+            git clone --depth 1 https://github.com/${{ github.repository }}.git temp-deploy
+            cp -r temp-deploy/* ./
+            cp -r temp-deploy/.* ./ 2>/dev/null || true
+            rm -rf temp-deploy
+            
+            # Deploy using docker-compose with production profile
+            docker-compose down || true
+            docker-compose --profile prod up -d --build
+            
+            # Clean up
+            docker image prune -f
+            
+            # Verify deployment
+            echo "Waiting for application to start..."
+            sleep 30
+            if curl -f http://localhost:${{ vars.APP_PORT }}/admin > /dev/null 2>&1; then
+              echo "✅ Strapi deployed successfully on port ${{ vars.APP_PORT }}!"
+              echo "🌐 Application is available at: http://${{ vars.HOST }}:${{ vars.APP_PORT }}"
+            else
+              echo "❌ Deployment verification failed!"
+              echo "📋 Container logs:"
+              docker-compose --profile prod logs || true
+              exit 1
+            fi
