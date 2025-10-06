@@ -19,6 +19,7 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       APP_KEYS: ${APP_KEYS}
       NODE_ENV: development
+      PORT: ${PORT:-1337}
     volumes:
       - ./config:/opt/app/config
       - ./src:/opt/app/src
@@ -27,7 +28,7 @@ services:
       - ./.env:/opt/app/.env
       - ./public/uploads:/opt/app/public/uploads
     ports:
-      - "1337:1337"
+      - "${APP_PORT:-1337}:${PORT:-1337}"
     networks:
       - strapi
     depends_on:
@@ -53,10 +54,11 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       APP_KEYS: ${APP_KEYS}
       NODE_ENV: production
+      PORT: ${PORT:-1337}
     volumes:
       - strapi-uploads:/opt/app/public/uploads
     ports:
-      - "${APP_PORT:-8202}:1337"
+      - "${APP_PORT:-8202}:${PORT:-1337}"
     networks:
       - strapi
     depends_on:

@@ -51,7 +51,8 @@ Create a `.env` file in the project root (see `env.example`):
 ```bash
 # Server
 NODE_ENV=development
-APP_PORT=1337
+APP_PORT=1337  # External port (host machine)
+PORT=1337      # Internal port (inside container)
 
 # Database
 DATABASE_CLIENT=mysql
@@ -157,6 +158,24 @@ docker-compose down -v
 docker volume rm serviceatlas-strapi_strapi-data serviceatlas-strapi_strapi-uploads
 docker-compose up --build
 ```
+
+## Running Multiple Strapi Instances
+
+If you need to run multiple Strapi instances on the same server, configure different ports:
+
+**Instance 1 (ServiceAtlas):**
+```bash
+APP_PORT=8202  # External port
+PORT=1337      # Internal port
+```
+
+**Instance 2 (Another App):**
+```bash
+APP_PORT=8203  # Different external port
+PORT=1338      # Different internal port (avoid conflicts)
+```
+
+The mapping works as: `APP_PORT:PORT` → `8202:1337` means external port 8202 maps to container port 1337.
 
 ## Access
 
