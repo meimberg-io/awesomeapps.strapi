@@ -9,44 +9,27 @@ A Strapi headless CMS for ServiceAtlas project management.
 npm install
 npm run dev
 ```
-Open [http://localhost:1337](http://localhost:1337)
+Open [http://localhost:1337/admin](http://localhost:1337/admin)
 
-### Docker Development
+### Docker Development (Recommended)
 ```bash
-docker-compose --profile dev --profile database up --build
+docker-compose up
 ```
-Open [http://localhost:8202](http://localhost:8202)
+Open [http://localhost:1337/admin](http://localhost:1337/admin)
+
+See [Docker Guide](doc/DOCKER.md) for more details.
+
+## Documentation
+
+- **[Docker Setup](doc/DOCKER.md)** - How to run with Docker Compose
+- **[GitHub Actions Setup](doc/GITHUB-SETUP.md)** - Configure deployment pipeline
+- **[Pull Live Data](doc/PULL-LIVE.md)** - Sync data from production
 
 ## Deployment
 
-### Prerequisites
-1. **Server Setup** (one-time):
-   ```bash
-   # Run on your server once
-   curl -fsSL https://raw.githubusercontent.com/meimberg-io/io.meimberg.serversetup/main/scripts/server-setup.sh | sudo bash
-   ```
+Push to `master` branch triggers automatic deployment via GitHub Actions.
 
-2. **GitHub Configuration**:
-   - **Variables**: `APP_PORT`, `HOST`, `USERNAME`
-   - **Secrets**: `SSH_PRIVATE_KEY`
-
-### Deploy
-Push to `master` branch → automatic deployment via GitHub Actions
-
-## Project Structure
-
-```
-├── config/           # Strapi configuration files
-├── src/
-│   ├── api/          # API routes and controllers
-│   ├── components/   # Reusable components
-│   └── policies/     # Custom policies
-├── public/           # Static files and uploads
-├── database/         # Database migrations
-├── docker-compose.yml # Unified dev/prod config
-├── Dockerfile        # Multi-stage build
-└── .github/workflows/ # CI/CD pipeline
-```
+See [GitHub Setup Guide](doc/GITHUB-SETUP.md) for configuration details.
 
 ## Tech Stack
 
@@ -55,68 +38,55 @@ Push to `master` branch → automatic deployment via GitHub Actions
 - **Language**: TypeScript
 - **Deployment**: Docker + GitHub Actions
 
-## Development
+## Available Scripts
 
-### Available Scripts
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
 npm run start        # Start production server
-npm run lint         # Run linting (placeholder)
-npm run test         # Run tests (placeholder)
-npm run test:ci      # Run tests with CI (placeholder)
-```
-
-### Docker Profiles
-```bash
-# Development (with volume mounts + database)
-docker-compose --profile dev --profile database up
-
-# Production (no volume mounts + database)
-docker-compose --profile prod --profile database up
-
-# Database only
-docker-compose --profile database up
+npm run pull-live    # Pull data from live site
 ```
 
 ## Environment Variables
 
-### Local (.env)
+Copy `env.example` to `.env` and configure:
+
 ```bash
+# Server
 NODE_ENV=development
-APP_PORT=8202
+APP_PORT=1337
+
+# Database
 DATABASE_CLIENT=mysql
-DATABASE_HOST=mysql
+DATABASE_HOST=strapiDB
 DATABASE_PORT=3306
 DATABASE_NAME=strapi
 DATABASE_USERNAME=strapi
 DATABASE_PASSWORD=strapi_password
+
+# Secrets (generate with: openssl rand -base64 32)
+APP_KEYS=key1,key2,key3,key4
+API_TOKEN_SALT=your-salt
+ADMIN_JWT_SECRET=your-secret
+TRANSFER_TOKEN_SALT=your-salt
+JWT_SECRET=your-secret
 ```
 
-### Production (auto-generated)
+## Docker Profiles
+
 ```bash
-NODE_ENV=production
-APP_PORT=<from GitHub variable>
-PORT=1337
-# ... database and app keys
+# Development (default - hot reload, volume mounts)
+docker-compose up
+
+# Production (optimized build, persistent volumes)
+docker-compose --profile prod up
 ```
 
-## Database
+## API Endpoints
 
-### MySQL Configuration
-- **Host**: `mysql` (Docker) or `localhost` (local)
-- **Port**: `3306`
-- **Database**: `strapi`
-- **User**: `strapi`
-- **Password**: `strapi_password`
-
-### Required App Keys
-Strapi requires these environment variables:
-- `APP_KEYS` - Comma-separated keys for app encryption
-- `API_TOKEN_SALT` - Salt for API token generation
-- `ADMIN_JWT_SECRET` - Secret for admin JWT tokens
-- `TRANSFER_TOKEN_SALT` - Salt for transfer tokens
-- `JWT_SECRET` - Secret for JWT tokens
+- **Admin Panel**: `/admin`
+- **REST API**: `/api`
+- **GraphQL**: `/graphql`
 
 ## Content Types
 
@@ -126,20 +96,14 @@ Strapi requires these environment variables:
 - **Tag** - Service tags
 - **New Service** - Service creation requests
 
-## API Endpoints
-
-- **Admin Panel**: `/admin`
-- **API**: `/api`
-- **GraphQL**: `/graphql` (if enabled)
-
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test locally with Docker
+4. Test locally with `docker-compose up`
 5. Submit a pull request
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License
