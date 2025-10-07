@@ -56,7 +56,7 @@ services:
       NODE_ENV: production
       PORT: ${PORT:-1337}
     volumes:
-      - strapi-uploads:/opt/app/public/uploads
+      - strapi-uploads:/opt/app/public
     ports:
       - "${APP_PORT:-8202}:${PORT:-1337}"
     networks:

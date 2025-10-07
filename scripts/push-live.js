@@ -47,10 +47,21 @@ if (!isInDocker) {
 
   try {
     // Check if strapi-dev container is running
-    execSync('docker ps --filter "name=strapi-dev" --filter "status=running" --format "{{.Names}}"', { 
+    const containerCheck = execSync('docker ps --filter "name=strapi-dev" --filter "status=running" --format "{{.Names}}"', { 
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe']
     }).trim();
+    
+    if (!containerCheck) {
+      console.error('❌ Error: strapi-dev container is not running!');
+      console.error('');
+      console.error('Please start the container first:');
+      console.error('  docker-compose --profile dev up -d');
+      console.error('');
+      console.error('Then try again:');
+      console.error('  npm run push-live');
+      process.exit(1);
+    }
     
     // Run the command inside the container with environment variables
     const dockerCmd = `docker exec -i -e STRAPI_LIVE_URL="${envVars.STRAPI_LIVE_URL}" -e STRAPI_LIVE_TOKEN="${envVars.STRAPI_LIVE_TOKEN}" strapi-dev npm run push-live`;
@@ -60,13 +71,9 @@ if (!isInDocker) {
     });
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error: strapi-dev container is not running!');
+    console.error('❌ Error executing push command!');
     console.error('');
-    console.error('Please start the container first:');
-    console.error('  docker-compose up -d');
-    console.error('');
-    console.error('Then try again:');
-    console.error('  npm run push-live');
+    console.error(error.message);
     process.exit(1);
   }
 }
@@ -118,8 +125,8 @@ if (!STRAPI_LIVE_URL || !STRAPI_LIVE_TOKEN) {
   process.exit(1);
 }
 
-// Build the command
-const command = `strapi transfer --to="${STRAPI_LIVE_URL}" --to-token="${STRAPI_LIVE_TOKEN}"`;
+// Build the command with --force flag
+const command = `strapi transfer --to="${STRAPI_LIVE_URL}" --to-token="${STRAPI_LIVE_TOKEN}" --force`;
 
 console.log('⚠️  WARNING: You are about to push local data to the live server!');
 console.log(`📤 Pushing data to: ${STRAPI_LIVE_URL}`);
