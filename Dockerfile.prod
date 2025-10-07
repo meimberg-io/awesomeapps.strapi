@@ -27,6 +27,14 @@ ENV PATH=/opt/node_modules/.bin:$PATH
 RUN chown -R node:node /opt/app && \
     mkdir -p /opt/app/public/uploads && \
     chown -R node:node /opt/app/public
+
+# Backup all public files (except uploads) to restore them if volume is mounted over them
+# This ensures static files like robots.txt, favicon, etc. persist
+RUN mkdir -p /opt/app/.public-template && \
+    find /opt/app/public -maxdepth 1 -type f -exec cp {} /opt/app/.public-template/ \; && \
+    chown -R node:node /opt/app/.public-template
+
 USER node
 EXPOSE 1337
-CMD ["npm", "run", "start"]
+# Ensure uploads directory exists, restore missing static files, then start
+CMD sh -c "mkdir -p /opt/app/public/uploads && for file in /opt/app/.public-template/*; do [ -f \"/opt/app/public/\$(basename \$file)\" ] || cp \$file /opt/app/public/; done 2>/dev/null || true; npm run start"
