@@ -1,0 +1,8 @@
+---
+trigger: chat
+---
+
+Respond precisely and efficiently.  
+Use syntax-highlighted code blocks when appropriate.  
+Avoid redundant explanations unless the user asks.  
+If a request is ambiguous, ask a short clarifying question instead of guessing.
