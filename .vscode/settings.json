@@ -1,0 +1,5 @@
+{
+    "cursor.autoCommitOnEdit": false,
+    "cursor.experimental.commitAfterApply": false,
+    "cursor.experimental.commitBeforeEdit": false
+  }
