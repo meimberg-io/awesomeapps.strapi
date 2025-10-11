@@ -17,17 +17,37 @@ export default factories.createCoreController('api::member.member' as any, ({ st
         return ctx.badRequest('Email is required');
       }
 
-      // Find or create member from OAuth data
+      // 1. Find or create Strapi user for authentication
+      const user = await strapi.service('api::member.member').findOrCreateStrapiUser({
+        email,
+        name,
+        provider: provider || 'google',
+      });
+
+      // 2. Find or create member linked to this user
       const member = await strapi.service('api::member.member').findOrCreateFromOAuth({
         email,
         name,
         avatarUrl: picture,
         provider: provider || 'google',
         oauthId: sub,
+        strapiUserId: user.id,
+      });
+
+      // 3. Generate JWT token
+      const jwt = strapi.plugins['users-permissions'].services.jwt.issue({
+        id: user.id,
+        memberId: member.id,
       });
 
       return ctx.send({
-        data: member,
+        jwt,
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+        },
+        member: member,
       });
     } catch (error) {
       ctx.throw(500, error);
@@ -92,15 +112,27 @@ export default factories.createCoreController('api::member.member' as any, ({ st
   async addFavorite(ctx) {
     try {
       const { id } = ctx.params;
-      const { serviceId } = ctx.request.body;
+      const { serviceId, serviceDocumentId } = ctx.request.body;
 
-      if (!serviceId) {
-        return ctx.badRequest('serviceId is required');
+      // Accept either numeric ID or documentId
+      let actualServiceId;
+      if (serviceDocumentId) {
+        actualServiceId = await strapi.service('api::member.member').getServiceIdByDocumentId(serviceDocumentId);
+      } else if (serviceId) {
+        // Check if serviceId is numeric or documentId string
+        const isNumeric = /^\d+$/.test(String(serviceId));
+        actualServiceId = isNumeric 
+          ? serviceId 
+          : await strapi.service('api::member.member').getServiceIdByDocumentId(serviceId);
+      }
+
+      if (!actualServiceId) {
+        return ctx.badRequest('serviceId or serviceDocumentId is required');
       }
 
       const result = await strapi.service('api::member.member').addFavorite(
         parseInt(id),
-        parseInt(serviceId)
+        parseInt(actualServiceId)
       );
 
       return ctx.send(result);
@@ -117,9 +149,20 @@ export default factories.createCoreController('api::member.member' as any, ({ st
     try {
       const { id, serviceId } = ctx.params;
 
+      // Check if serviceId is a documentId (string) or numeric ID
+      // If it's not a valid number, treat it as documentId
+      const isNumeric = /^\d+$/.test(serviceId);
+      const actualServiceId = isNumeric
+        ? serviceId
+        : await strapi.service('api::member.member').getServiceIdByDocumentId(serviceId);
+
+      if (!actualServiceId) {
+        return ctx.badRequest(`Service not found with identifier: ${serviceId}`);
+      }
+
       const result = await strapi.service('api::member.member').removeFavorite(
         parseInt(id),
-        parseInt(serviceId)
+        parseInt(actualServiceId)
       );
 
       return ctx.send(result);
@@ -136,9 +179,15 @@ export default factories.createCoreController('api::member.member' as any, ({ st
     try {
       const { id, serviceId } = ctx.params;
 
+      // Check if serviceId is a documentId (string) or numeric ID
+      const isNumeric = /^\d+$/.test(serviceId);
+      const actualServiceId = isNumeric
+        ? serviceId
+        : await strapi.service('api::member.member').getServiceIdByDocumentId(serviceId);
+
       const isFavorite = await strapi.service('api::member.member').isFavorite(
         parseInt(id),
-        parseInt(serviceId)
+        parseInt(actualServiceId)
       );
 
       return ctx.send({

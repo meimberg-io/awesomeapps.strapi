@@ -63,6 +63,11 @@
       "type": "boolean",
       "default": true
     },
+    "strapiUser": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
     "createdAt": {
       "type": "datetime"
     }

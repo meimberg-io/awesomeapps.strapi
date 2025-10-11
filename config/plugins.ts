@@ -6,6 +6,11 @@ const plugins = {
             playgroundAlways: true, // GraphQL-Playground aktiv lassen
             defaultLimit: 100, // Standard-Limit für Abfragen
             maxLimit: 200, // Maximales Abfrageergebnis
+            depthLimit: 10,
+            amountLimit: 100,
+            apolloServer: {
+                introspection: true,
+            },
         },
     },
     "content-manager": {
