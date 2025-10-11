@@ -4,7 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreService('api::member.member', ({ strapi }) => ({
+export default factories.createCoreService('api::member.member' as any, ({ strapi }) => ({
   /**
    * Find or create a member from OAuth data
    */

@@ -4,7 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreController('api::member.member', ({ strapi }) => ({
+export default factories.createCoreController('api::member.member' as any, ({ strapi }) => ({
   /**
    * Get current member (from OAuth session)
    * POST /api/members/me
