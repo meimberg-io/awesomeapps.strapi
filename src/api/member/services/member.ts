@@ -6,6 +6,43 @@ import { factories } from '@strapi/strapi';
 
 export default factories.createCoreService('api::member.member' as any, ({ strapi }) => ({
   /**
+   * Find or create a Strapi user for authentication
+   */
+  async findOrCreateStrapiUser(oauthData: {
+    email: string;
+    name?: string;
+    provider: 'google' | 'github' | 'azure-ad';
+  }) {
+    const { email, name, provider } = oauthData;
+
+    // Try to find existing user
+    let user = await strapi.query('plugin::users-permissions.user').findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      // Get the authenticated role
+      const authenticatedRole = await strapi.query('plugin::users-permissions.role').findOne({
+        where: { type: 'authenticated' },
+      });
+
+      // Create new user
+      user = await strapi.query('plugin::users-permissions.user').create({
+        data: {
+          username: email.split('@')[0] + '_' + provider + '_' + Date.now(),
+          email,
+          confirmed: true,
+          blocked: false,
+          provider: provider,
+          role: authenticatedRole.id,
+        },
+      });
+    }
+
+    return user;
+  },
+
+  /**
    * Find or create a member from OAuth data
    */
   async findOrCreateFromOAuth(oauthData: {
@@ -14,8 +51,9 @@ export default factories.createCoreService('api::member.member' as any, ({ strap
     avatarUrl?: string;
     provider: 'google' | 'github' | 'azure-ad';
     oauthId: string;
+    strapiUserId?: number;
   }) {
-    const { email, name, avatarUrl, provider, oauthId } = oauthData;
+    const { email, name, avatarUrl, provider, oauthId, strapiUserId } = oauthData;
 
     // Try to find existing member by email
     let member = await strapi.db.query('api::member.member').findOne({
@@ -33,8 +71,9 @@ export default factories.createCoreService('api::member.member' as any, ({ strap
           displayName: name || member.displayName,
           oauthProvider: provider,
           oauthId: oauthId,
+          ...(strapiUserId && { strapiUser: strapiUserId }),
         },
-        populate: ['favorites', 'reviews'],
+        populate: ['favorites', 'reviews', 'strapiUser'],
       });
     } else {
       // Create new member
@@ -59,8 +98,9 @@ export default factories.createCoreService('api::member.member' as any, ({ strap
           oauthId,
           lastlogin: new Date(),
           isActive: true,
+          ...(strapiUserId && { strapiUser: strapiUserId }),
         },
-        populate: ['favorites', 'reviews'],
+        populate: ['favorites', 'reviews', 'strapiUser'],
       });
     }
 
@@ -82,6 +122,17 @@ export default factories.createCoreService('api::member.member' as any, ({ strap
         },
       },
     });
+  },
+
+  /**
+   * Get service numeric ID from documentId
+   */
+  async getServiceIdByDocumentId(documentId: string) {
+    const service = await strapi.db.query('api::service.service').findOne({
+      where: { documentId },
+      select: ['id'],
+    });
+    return service?.id;
   },
 
   /**
@@ -130,7 +181,12 @@ export default factories.createCoreService('api::member.member' as any, ({ strap
 
     // Remove from favorites
     const currentFavoriteIds = member.favorites?.map((fav: any) => fav.id) || [];
-    const newFavoriteIds = currentFavoriteIds.filter((id: number) => id !== serviceId);
+    // Ensure both IDs are numbers for comparison
+    const serviceIdNum = parseInt(String(serviceId));
+    const newFavoriteIds = currentFavoriteIds.filter((id: number) => {
+      const currentIdNum = parseInt(String(id));
+      return currentIdNum !== serviceIdNum;
+    });
 
     await strapi.db.query('api::member.member').update({
       where: { id: memberId },

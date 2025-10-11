@@ -4,29 +4,11 @@
 
 export default {
   routes: [
-    // CRUD routes
+    // Standard CRUD routes (needed for GraphQL shadowCRUD)
     {
-      method: 'POST',
+      method: 'GET',
       path: '/reviews',
-      handler: 'review.create',
-      config: {
-        policies: [],
-        middlewares: [],
-      },
-    },
-    {
-      method: 'PUT',
-      path: '/reviews/:id',
-      handler: 'review.update',
-      config: {
-        policies: [],
-        middlewares: [],
-      },
-    },
-    {
-      method: 'DELETE',
-      path: '/reviews/:id',
-      handler: 'review.delete',
+      handler: 'review.find',
       config: {
         policies: [],
         middlewares: [],
@@ -38,6 +20,33 @@ export default {
       handler: 'review.findOne',
       config: {
         policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/reviews',
+      handler: 'review.create',
+      config: {
+        policies: ['api::member.authenticate-member'],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/reviews/:id',
+      handler: 'review.update',
+      config: {
+        policies: ['api::member.authenticate-member'],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/reviews/:id',
+      handler: 'review.delete',
+      config: {
+        policies: ['api::member.authenticate-member'],
         middlewares: [],
       },
     },

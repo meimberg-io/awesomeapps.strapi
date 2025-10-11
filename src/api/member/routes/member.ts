@@ -48,7 +48,7 @@ export default {
       path: '/members/:id/profile',
       handler: 'member.updateProfile',
       config: {
-        policies: [],
+        policies: ['api::member.authenticate-member'],
         middlewares: [],
       },
     },
@@ -66,7 +66,7 @@ export default {
       path: '/members/:id/favorites',
       handler: 'member.addFavorite',
       config: {
-        policies: [],
+        policies: ['api::member.authenticate-member'],
         middlewares: [],
       },
     },
@@ -75,7 +75,7 @@ export default {
       path: '/members/:id/favorites/:serviceId',
       handler: 'member.removeFavorite',
       config: {
-        policies: [],
+        policies: ['api::member.authenticate-member'],
         middlewares: [],
       },
     },
