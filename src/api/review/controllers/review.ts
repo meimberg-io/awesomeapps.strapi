@@ -11,32 +11,66 @@ export default factories.createCoreController('api::review.review' as any, ({ st
    */
   async create(ctx) {
     try {
-      const { reviewtext, voting, memberId, serviceId } = ctx.request.body;
-
-      if (!reviewtext || !voting || !memberId || !serviceId) {
-        return ctx.badRequest('reviewtext, voting, memberId, and serviceId are required');
+      // Manually decode and validate JWT
+      const authHeader = ctx.request.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return ctx.unauthorized('No authorization token provided');
       }
 
-      const review = await strapi.service('api::review.review').createReview({
-        reviewtext,
-        voting: parseInt(voting),
-        memberId: parseInt(memberId),
-        serviceId: parseInt(serviceId),
-      });
+      const token = authHeader.replace('Bearer ', '');
+      let decoded;
+      
+      try {
+        decoded = await strapi.plugins['users-permissions'].services.jwt.verify(token);
+      } catch (err) {
+        return ctx.unauthorized('Invalid token');
+      }
 
-      return ctx.send({
-        data: review,
-      });
+      const memberId = decoded.memberId;
+      
+      if (!memberId) {
+        return ctx.unauthorized('You must be logged in to create a review');
+      }
+
+      // Extract data from request body (Strapi format)
+      const { data } = ctx.request.body;
+      const { reviewtext, voting, service } = data || {};
+
+      if (!voting || !service) {
+        return ctx.badRequest('voting and service are required');
+      }
+
+      // Get service numeric ID from documentId if needed
+      let serviceId = service;
+      if (typeof service === 'string' && service.length > 10) {
+        // It's a documentId, need to convert to numeric ID
+        const serviceRecord = await strapi.db.query('api::service.service').findOne({
+          where: { documentId: service },
+          select: ['id'],
+        });
+        if (!serviceRecord) {
+          return ctx.notFound('Service not found');
+        }
+        serviceId = serviceRecord.id;
+      }
+
+      // Create review using default Strapi controller with our data
+      ctx.request.body = {
+        data: {
+          reviewtext: reviewtext || null,
+          voting: parseInt(voting),
+          member: memberId,
+          service: parseInt(serviceId),
+          isPublished: true,
+          helpfulCount: 0,
+        },
+      };
+
+      // Call the default create method
+      return super.create(ctx);
     } catch (error) {
-      if (error.message.includes('already reviewed')) {
-        return ctx.badRequest(error.message);
-      }
-      if (error.message.includes('not found')) {
-        return ctx.notFound(error.message);
-      }
-      if (error.message.includes('must be between')) {
-        return ctx.badRequest(error.message);
-      }
+      console.error('Error creating review:', error);
       ctx.throw(500, error);
     }
   },

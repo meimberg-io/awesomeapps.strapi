@@ -13,8 +13,7 @@
   "attributes": {
     "reviewtext": {
       "type": "text",
-      "required": true,
-      "minLength": 10,
+      "required": false,
       "maxLength": 2000
     },
     "voting": {
