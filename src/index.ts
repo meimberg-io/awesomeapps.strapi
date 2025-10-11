@@ -57,6 +57,8 @@ export default {
                         async resolve(parent, args, context) {
                             const {tags, sort} = args;
 
+                            strapi.log.info(`[servicesbytags] Called with ${tags.length} tags`);
+
                             const queryOptions = {
                                 filters: {
                                     publishedAt: {
@@ -64,6 +66,9 @@ export default {
                                     },
                                 },
                                 populate: { tags: true },
+                                pagination: {
+                                    limit: -1  // Fetch all services without pagination
+                                },
                                 ...(sort && { orderBy: sort.split(",").map((s) => {
                                         const [field, direction] = s.trim().split(":");
                                         return { [field]: direction === "desc" ? "desc" : "asc" };
@@ -71,11 +76,17 @@ export default {
                             };
 
                             const services = await strapi.entityService.findMany("api::service.service", queryOptions);
+                            
+                            strapi.log.info(`[servicesbytags] Found ${services.length} total services from DB`);
 
-                            return tags.length === 0 ? services : services.filter(service => {
+                            const filteredServices = tags.length === 0 ? services : services.filter(service => {
                                 const serviceTagIds = service.tags.map((tag) => tag.documentId);
                                 return tags.every((tagId) => serviceTagIds.includes(tagId));
                             });
+
+                            strapi.log.info(`[servicesbytags] Returning ${filteredServices.length} services after filtering`);
+
+                            return filteredServices;
                         }
                     }
                 }
@@ -84,7 +95,7 @@ export default {
                 "Query.servicesbytags": {
                     auth: false,
                     policies: ["global::servicesbytags"],
-                    resolverOf: 'api::service.services.find',
+                    resolverOf: 'api::service.service.find',
                 },
             },
 
