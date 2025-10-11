@@ -185,7 +185,7 @@ async function importArticles() {
 }
 
 async function importGlobal() {
-  const favicon = await checkFileExistsBeforeUpload(['favicon.png']);
+  const favicon = await checkFileExistsBeforeUpload(['favicon.svg']);
   const shareImage = await checkFileExistsBeforeUpload(['default-image.png']);
   return createEntry({
     model: 'global',
