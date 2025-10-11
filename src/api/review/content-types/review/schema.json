@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "reviews",
+  "info": {
+    "singularName": "review",
+    "pluralName": "reviews",
+    "displayName": "Review",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "reviewtext": {
+      "type": "text",
+      "required": true,
+      "minLength": 10,
+      "maxLength": 2000
+    },
+    "voting": {
+      "type": "integer",
+      "max": 5,
+      "min": 1,
+      "required": true
+    },
+    "member": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::member.member",
+      "inversedBy": "reviews"
+    },
+    "service": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::service.service",
+      "inversedBy": "reviews"
+    },
+    "isPublished": {
+      "type": "boolean",
+      "default": true
+    },
+    "helpfulCount": {
+      "type": "integer",
+      "default": 0
+    },
+    "createdAt": {
+      "type": "datetime"
+    },
+    "updatedAt": {
+      "type": "datetime"
+    }
+  }
+}

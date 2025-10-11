@@ -1,0 +1,70 @@
+{
+  "kind": "collectionType",
+  "collectionName": "members",
+  "info": {
+    "singularName": "member",
+    "pluralName": "members",
+    "displayName": "Member",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "email": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "username": {
+      "type": "string",
+      "unique": true
+    },
+    "displayName": {
+      "type": "string"
+    },
+    "avatarUrl": {
+      "type": "string"
+    },
+    "oauthProvider": {
+      "type": "enumeration",
+      "enum": ["google", "github", "azure-ad", "local"],
+      "default": "local"
+    },
+    "oauthId": {
+      "type": "string"
+    },
+    "favorites": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service"
+    },
+    "lastlogin": {
+      "type": "datetime"
+    },
+    "reviews": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::review.review",
+      "mappedBy": "member"
+    },
+    "bio": {
+      "type": "text",
+      "maxLength": 500
+    },
+    "avatar": {
+      "allowedTypes": [
+        "images"
+      ],
+      "type": "media",
+      "multiple": false
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "createdAt": {
+      "type": "datetime"
+    }
+  }
+}
