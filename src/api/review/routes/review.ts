@@ -28,7 +28,7 @@ export default {
       path: '/reviews',
       handler: 'review.create',
       config: {
-        policies: ['api::member.authenticate-member'],
+        policies: [],
         middlewares: [],
       },
     },

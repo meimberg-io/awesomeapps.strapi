@@ -58,6 +58,11 @@ export default {
                             const {tags, sort} = args;
 
                             const queryOptions = {
+                                filters: {
+                                    publishedAt: {
+                                        $notNull: true,
+                                    },
+                                },
                                 populate: { tags: true },
                                 ...(sort && { orderBy: sort.split(",").map((s) => {
                                         const [field, direction] = s.trim().split(":");
