@@ -4,7 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreService('api::review.review', ({ strapi }) => ({
+export default factories.createCoreService('api::review.review' as any, ({ strapi }) => ({
   /**
    * Create a new review
    */
