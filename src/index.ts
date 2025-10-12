@@ -57,43 +57,35 @@ export default {
                         async resolve(parent, args, context) {
                             const {tags, sort} = args;
 
-                            strapi.log.info(`[servicesbytags] ===== RESOLVER CALLED =====`);
-                            strapi.log.info(`[servicesbytags] Tags array:`, tags);
-                            strapi.log.info(`[servicesbytags] Sort:`, sort);
+                            // Fetch all services with tags populated
+                            // Note: publishedAt filter doesn't work in entityService.findMany, so we filter manually
+                            const allServices = await strapi.entityService.findMany("api::service.service", {
+                                populate: { tags: true },
+                            });
 
-                            const queryOptions = {
-                                filters: {
-                                    publishedAt: {
-                                        $notNull: true,
-                                    },
-                                },
-                                populate: ['tags', 'thumbnail', 'logo'],
-                                pagination: {
-                                    limit: -1  // Fetch all services without pagination
-                                },
-                                ...(sort && { sort: sort }),
-                            };
+                            // Filter out unpublished services manually
+                            const publishedServices = allServices.filter(service => service.publishedAt !== null);
 
-                            strapi.log.info(`[servicesbytags] Query options:`, JSON.stringify(queryOptions, null, 2));
-
-                            const services = await strapi.entityService.findMany("api::service.service", queryOptions);
-                            
-                            strapi.log.info(`[servicesbytags] Found ${services ? services.length : 0} total services from DB`);
-                            
-                            if (!services || services.length === 0) {
-                                strapi.log.warn(`[servicesbytags] No services returned from entityService.findMany!`);
-                                return [];
-                            }
-
-                            const filteredServices = tags.length === 0 ? services : services.filter(service => {
-                                const serviceTagIds = service.tags ? service.tags.map((tag) => tag.documentId) : [];
+                            // Filter by tags if specified
+                            let filtered = tags.length === 0 ? publishedServices : publishedServices.filter(service => {
+                                const serviceTagIds = service.tags.map((tag) => tag.documentId);
                                 return tags.every((tagId) => serviceTagIds.includes(tagId));
                             });
 
-                            strapi.log.info(`[servicesbytags] Returning ${filteredServices.length} services after filtering`);
-                            strapi.log.info(`[servicesbytags] ===== RESOLVER COMPLETE =====`);
+                            // Sort if requested
+                            if (sort && filtered.length > 0) {
+                                const [field, direction] = sort.split(":").map(s => s.trim());
+                                filtered.sort((a, b) => {
+                                    const aVal = a[field] || '';
+                                    const bVal = b[field] || '';
+                                    if (direction === 'desc') {
+                                        return bVal > aVal ? 1 : -1;
+                                    }
+                                    return aVal > bVal ? 1 : -1;
+                                });
+                            }
 
-                            return filteredServices;
+                            return filtered;
                         }
                     }
                 }
@@ -102,7 +94,7 @@ export default {
                 "Query.servicesbytags": {
                     auth: false,
                     policies: ["global::servicesbytags"],
-                    resolverOf: 'api::service.service.find',
+                    resolverOf: 'api::service.services.find',
                 },
             },
 
@@ -123,3 +115,4 @@ export default {
 
 
 };
+
