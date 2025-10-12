@@ -57,7 +57,9 @@ export default {
                         async resolve(parent, args, context) {
                             const {tags, sort} = args;
 
-                            strapi.log.info(`[servicesbytags] Called with ${tags.length} tags`);
+                            strapi.log.info(`[servicesbytags] ===== RESOLVER CALLED =====`);
+                            strapi.log.info(`[servicesbytags] Tags array:`, tags);
+                            strapi.log.info(`[servicesbytags] Sort:`, sort);
 
                             const queryOptions = {
                                 filters: {
@@ -65,26 +67,31 @@ export default {
                                         $notNull: true,
                                     },
                                 },
-                                populate: { tags: true },
+                                populate: ['tags', 'thumbnail', 'logo'],
                                 pagination: {
                                     limit: -1  // Fetch all services without pagination
                                 },
-                                ...(sort && { orderBy: sort.split(",").map((s) => {
-                                        const [field, direction] = s.trim().split(":");
-                                        return { [field]: direction === "desc" ? "desc" : "asc" };
-                                    })}),
+                                ...(sort && { sort: sort }),
                             };
+
+                            strapi.log.info(`[servicesbytags] Query options:`, JSON.stringify(queryOptions, null, 2));
 
                             const services = await strapi.entityService.findMany("api::service.service", queryOptions);
                             
-                            strapi.log.info(`[servicesbytags] Found ${services.length} total services from DB`);
+                            strapi.log.info(`[servicesbytags] Found ${services ? services.length : 0} total services from DB`);
+                            
+                            if (!services || services.length === 0) {
+                                strapi.log.warn(`[servicesbytags] No services returned from entityService.findMany!`);
+                                return [];
+                            }
 
                             const filteredServices = tags.length === 0 ? services : services.filter(service => {
-                                const serviceTagIds = service.tags.map((tag) => tag.documentId);
+                                const serviceTagIds = service.tags ? service.tags.map((tag) => tag.documentId) : [];
                                 return tags.every((tagId) => serviceTagIds.includes(tagId));
                             });
 
                             strapi.log.info(`[servicesbytags] Returning ${filteredServices.length} services after filtering`);
+                            strapi.log.info(`[servicesbytags] ===== RESOLVER COMPLETE =====`);
 
                             return filteredServices;
                         }
