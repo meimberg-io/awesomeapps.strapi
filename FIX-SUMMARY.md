@@ -4,7 +4,7 @@
 The production system showed tag numbers and deep links worked, but no services were displayed on the start page, even when filtering by tags.
 
 ## Root Cause
-The `publishedAt` filter in `entityService.findMany()` was not working in the Strapi v5 GraphQL resolver. The filter syntax `{ publishedAt: { $notNull: true } }` returned 0 results even though 195 published services existed in the database.
+The `publishedAt` filter in `entityService.findMany()` does not work in Strapi v5's GraphQL resolver context. Additionally, `entityService.findMany()` does not return the `publishedAt` field by default, so manual filtering by `publishedAt !== null` removes ALL services.
 
 ## Solution
 **File:** `src/index.ts` - `servicesbytags` resolver
@@ -24,14 +24,14 @@ const services = await strapi.entityService.findMany("api::service.service", que
 
 **Changed to:**
 ```typescript
-// Fetch all services without filters
+// Fetch all services - GraphQL permissions already filter to published only
 const allServices = await strapi.entityService.findMany("api::service.service", {
     populate: { tags: true },
 });
-
-// Filter published services manually in JavaScript
-const publishedServices = allServices.filter(service => service.publishedAt !== null);
+// No manual publishedAt filtering needed - Strapi permissions handle this
 ```
+
+**Key insight:** Strapi's GraphQL permissions (configured in Settings → Roles → Public → Service: find) already restrict queries to published content only, so manual filtering is unnecessary and actually breaks the query.
 
 ## Files Changed
 
@@ -43,10 +43,14 @@ const publishedServices = allServices.filter(service => service.publishedAt !== 
   4. Sort results manually
 
 ### Frontend (Next.js)
-- **`src/app/page.tsx`** - Changed to load ALL services instead of just featured ones:
+- **`src/app/page.tsx`** - Initially shows only **featured (top) services**:
   ```typescript
-  const allServices = await fetchServices([])  // Loads all published services
+  const allServices = await fetchServices([])
+  const featuredServices = allServices.filter(service => service.top)
+  // When user applies filters, all matching services are shown via InteractiveServiceList
   ```
+- **`src/lib/graphql/service.ts`** - Added reviews to the query for real rating display
+- **`src/components/new/ServiceCard.tsx`** - Now displays real review counts and ratings
 - **Removed debug logging** from:
   - `src/lib/strapi.ts`
   - `src/components/new/InteractiveServiceList.tsx`

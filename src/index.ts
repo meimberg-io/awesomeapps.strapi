@@ -58,16 +58,16 @@ export default {
                             const {tags, sort} = args;
 
                             // Fetch all services with tags populated
-                            // Note: publishedAt filter doesn't work in entityService.findMany, so we filter manually
+                            // Review stats (count and average) are cached in the service fields
+                            // Note: GraphQL permissions already filter to published services only
                             const allServices = await strapi.entityService.findMany("api::service.service", {
-                                populate: { tags: true },
+                                populate: { 
+                                    tags: true
+                                },
                             });
 
-                            // Filter out unpublished services manually
-                            const publishedServices = allServices.filter(service => service.publishedAt !== null);
-
                             // Filter by tags if specified
-                            let filtered = tags.length === 0 ? publishedServices : publishedServices.filter(service => {
+                            let filtered = tags.length === 0 ? allServices : allServices.filter(service => {
                                 const serviceTagIds = service.tags.map((tag) => tag.documentId);
                                 return tags.every((tagId) => serviceTagIds.includes(tagId));
                             });

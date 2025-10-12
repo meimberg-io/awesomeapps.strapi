@@ -99,6 +99,15 @@
       "relation": "oneToMany",
       "target": "api::review.review",
       "mappedBy": "service"
+    },
+    "reviewCount": {
+      "type": "integer",
+      "default": 0,
+      "required": false
+    },
+    "averageRating": {
+      "type": "decimal",
+      "default": 0
     }
   }
 }
