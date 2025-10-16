@@ -17,6 +17,13 @@ const plugins = {
         enabled: true,
         // Hier ggf. weitere Einstellungen, falls benötigt.
     },
+    i18n: {
+        enabled: true,
+        config: {
+            defaultLocale: 'en',
+            locales: ['en', 'de'],
+        },
+    },
 
 };
 
