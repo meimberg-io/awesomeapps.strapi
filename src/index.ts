@@ -15,7 +15,7 @@ export default {
                     count(additionalTags: [ID]!): Int
                   },
                    type Query {
-                servicesbytags(tags: [ID]!, sort: String): [Service]
+                servicesbytags(tags: [ID]!, sort: String, locale: I18NLocaleCode): [Service]
                   }           
                `,
             resolvers: {
@@ -55,7 +55,7 @@ export default {
                     servicesbytags: {
 
                         async resolve(parent, args, context) {
-                            const {tags, sort} = args;
+                            const {tags, sort, locale} = args;
 
                             // Fetch all services with tags populated
                             // Review stats (count and average) are cached in the service fields
@@ -64,6 +64,7 @@ export default {
                                 populate: { 
                                     tags: true
                                 },
+                                locale: locale || 'en',
                             });
 
                             // Filter by tags if specified
