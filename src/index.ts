@@ -9,6 +9,19 @@ export default {
 
         strapi.log.info("Strapi wird gestartet...");
         strapi.log.debug("DEBUG: Strapi ist jetzt im Debug-Modus aktiv!");
+
+
+        // Force the socket to be treated as encrypted for proxy setups
+        // This is a workaround for the issue that the socket is not encrypted when using a proxy
+        // https://github.com/strapi/strapi/issues/24535
+        strapi.server.use(async (ctx, next) => {
+            if (ctx.req?.socket) {
+            (ctx.req.socket as any).encrypted = true;
+            }
+            await next();
+        });
+
+
         const extension = ({nexus}) => ({
             typeDefs: `
                   extend type Tag {
