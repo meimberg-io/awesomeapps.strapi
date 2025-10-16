@@ -40,7 +40,8 @@ export default {
       path: '/members/:id/profile',
       handler: 'member.profile',
       config: {
-        policies: ['api::member.authenticate-member'],
+        auth: false,
+        policies: [],
         middlewares: [],
       },
     },
@@ -49,7 +50,8 @@ export default {
       path: '/members/:id/profile',
       handler: 'member.updateProfile',
       config: {
-        policies: ['api::member.authenticate-member'],
+        auth: false,
+        policies: [],
         middlewares: [],
       },
     },
@@ -58,7 +60,8 @@ export default {
       path: '/members/:id/favorites',
       handler: 'member.getFavorites',
       config: {
-        policies: ['api::member.authenticate-member'],
+        auth: false,
+        policies: [],
         middlewares: [],
       },
     },
@@ -67,7 +70,8 @@ export default {
       path: '/members/:id/favorites',
       handler: 'member.addFavorite',
       config: {
-        policies: ['api::member.authenticate-member'],
+        auth: false,
+        policies: [],
         middlewares: [],
       },
     },
@@ -76,7 +80,8 @@ export default {
       path: '/members/:id/favorites/:serviceId',
       handler: 'member.removeFavorite',
       config: {
-        policies: ['api::member.authenticate-member'],
+        auth: false,
+        policies: [],
         middlewares: [],
       },
     },
@@ -94,7 +99,8 @@ export default {
       path: '/members/:id/reviews',
       handler: 'member.getReviews',
       config: {
-        policies: ['api::member.authenticate-member'],
+        auth: false,
+        policies: [],
         middlewares: [],
       },
     },
@@ -103,7 +109,8 @@ export default {
       path: '/members/:id/statistics',
       handler: 'member.getStatistics',
       config: {
-        policies: ['api::member.authenticate-member'],
+        auth: false,
+        policies: [],
         middlewares: [],
       },
     },
