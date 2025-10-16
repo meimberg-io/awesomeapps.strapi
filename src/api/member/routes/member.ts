@@ -30,6 +30,7 @@ export default {
       path: '/members/me',
       handler: 'member.me',
       config: {
+        auth: false, // Public endpoint - called during OAuth login
         policies: [],
         middlewares: [],
       },
@@ -39,7 +40,7 @@ export default {
       path: '/members/:id/profile',
       handler: 'member.profile',
       config: {
-        policies: [],
+        policies: ['api::member.authenticate-member'],
         middlewares: [],
       },
     },
@@ -57,7 +58,7 @@ export default {
       path: '/members/:id/favorites',
       handler: 'member.getFavorites',
       config: {
-        policies: [],
+        policies: ['api::member.authenticate-member'],
         middlewares: [],
       },
     },
@@ -93,7 +94,7 @@ export default {
       path: '/members/:id/reviews',
       handler: 'member.getReviews',
       config: {
-        policies: [],
+        policies: ['api::member.authenticate-member'],
         middlewares: [],
       },
     },
@@ -102,7 +103,7 @@ export default {
       path: '/members/:id/statistics',
       handler: 'member.getStatistics',
       config: {
-        policies: [],
+        policies: ['api::member.authenticate-member'],
         middlewares: [],
       },
     },
