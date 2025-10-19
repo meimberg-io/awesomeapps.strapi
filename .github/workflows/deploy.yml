@@ -1,0 +1,169 @@
+name: Build and Push Strapi
+
+on:
+  push:
+    branches: [ main, master ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=semver,pattern={{version}}
+          type=raw,value=latest
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.prod
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    env:
+      APP_DOMAIN: ${{ vars.APP_DOMAIN || 'strapi.meimberg.io' }}
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      APP_KEYS: ${{ secrets.APP_KEYS }}
+      API_TOKEN_SALT: ${{ secrets.API_TOKEN_SALT }}
+      ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
+      TRANSFER_TOKEN_SALT: ${{ secrets.TRANSFER_TOKEN_SALT }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    
+    steps:
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ vars.SERVER_HOST }}
+        username: ${{ vars.SERVER_USER || 'deploy' }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        envs: GITHUB_TOKEN,DOCKER_IMAGE,DATABASE_PASSWORD,APP_KEYS,API_TOKEN_SALT,ADMIN_JWT_SECRET,TRANSFER_TOKEN_SALT,JWT_SECRET
+        script: |
+          set -e
+          
+          # Login to GitHub Container Registry
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          # Create project directory
+          mkdir -p /srv/projects/strapi
+          cd /srv/projects/strapi
+          
+          # Create .env file with secrets
+          cat > .env << EOF
+          NODE_ENV=production
+          DATABASE_CLIENT=mysql
+          DATABASE_HOST=strapiDB
+          DATABASE_PORT=3306
+          DATABASE_NAME=strapi
+          DATABASE_USERNAME=strapi
+          DATABASE_PASSWORD=$DATABASE_PASSWORD
+          JWT_SECRET=$JWT_SECRET
+          ADMIN_JWT_SECRET=$ADMIN_JWT_SECRET
+          APP_KEYS=$APP_KEYS
+          API_TOKEN_SALT=$API_TOKEN_SALT
+          TRANSFER_TOKEN_SALT=$TRANSFER_TOKEN_SALT
+          PORT=1337
+          EOF
+          
+          # Create docker-compose.yml with Traefik labels
+          cat > docker-compose.yml << EOF
+          version: "3.9"
+          
+          services:
+            strapi:
+              image: $DOCKER_IMAGE
+              container_name: strapi
+              restart: unless-stopped
+              env_file: .env
+              volumes:
+                - strapi-uploads:/opt/app/public/uploads
+              labels:
+                - "traefik.enable=true"
+                - "traefik.http.routers.strapi.rule=Host(\`${{ env.APP_DOMAIN }}\`)"
+                - "traefik.http.routers.strapi.entrypoints=websecure"
+                - "traefik.http.routers.strapi.tls.certresolver=le"
+                - "traefik.http.services.strapi.loadbalancer.server.port=1337"
+              networks:
+                - strapi
+                - traefik
+              depends_on:
+                - strapiDB
+          
+            strapiDB:
+              image: mysql:8.0
+              container_name: strapiDB
+              platform: linux/amd64
+              restart: unless-stopped
+              env_file: .env
+              environment:
+                - MYSQL_ROOT_HOST=%
+                - MYSQL_USER=strapi
+                - MYSQL_ROOT_PASSWORD=\${DATABASE_PASSWORD}
+                - MYSQL_PASSWORD=\${DATABASE_PASSWORD}
+                - MYSQL_DATABASE=strapi
+                - MYSQL_TCP_PORT=3306
+              command: --default-authentication-plugin=mysql_native_password --port=3306
+              volumes:
+                - strapi-data:/var/lib/mysql
+              networks:
+                - strapi
+          
+          volumes:
+            strapi-data:
+            strapi-uploads:
+          
+          networks:
+            strapi:
+              driver: bridge
+            traefik:
+              external: true
+          EOF
+          
+          # Pull latest image and deploy
+          docker compose pull
+          docker compose up -d
+          
+          # Wait for containers to be ready
+          sleep 5
+          
+          # Verify deployment
+          if docker ps | grep -q strapi; then
+            echo "✅ Strapi deployed successfully!"
+            echo "🌐 Accessible at: https://${{ env.APP_DOMAIN }}"
+          else
+            echo "❌ Deployment failed - container not running"
+            docker logs strapi
+            exit 1
+          fi
+
