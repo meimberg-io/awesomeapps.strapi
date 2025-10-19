@@ -25,7 +25,7 @@ services:
       - TRANSFER_TOKEN_SALT=${TRANSFER_TOKEN_SALT}
       - PORT=1337
     volumes:
-      - awesomeapps-strapi-uploads:/opt/app/public/uploads
+      - awesomeapps-strapi-uploads:/opt/app/public
     labels:
       # Traefik automatic routing
       - "traefik.enable=true"
