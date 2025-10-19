@@ -101,7 +101,7 @@ git commit -m "Setup deployment"
 git push origin main
 ```
 
-**Monitor:** https://github.com/yourusername/awesomeapps.strapi/actions
+**Monitor:** https://github.com/meimberg-io/awesomeapps.strapi/actions
 
 **Deployment takes ~3-4 minutes:**
 1. ✅ Docker image builds

@@ -28,44 +28,44 @@ This covers:
 git push origin main
 ```
 
-Watch: https://github.com/yourusername/awesomeapps.strapi/actions
+Watch: https://github.com/meimberg-io/awesomeapps.strapi/actions
 
 ## Operations
 
 **View logs:**
 ```bash
-ssh deploy@hc-02.meimberg.io "docker logs strapi -f"
+ssh deploy@hc-02.meimberg.io "docker logs awesomeapps-strapi -f"
 ```
 
 **Restart:**
 ```bash
-ssh deploy@hc-02.meimberg.io "cd /srv/projects/strapi && docker compose restart"
+ssh deploy@hc-02.meimberg.io "cd /srv/projects/awesomeapps-strapi && docker compose restart"
 ```
 
 **Manual deploy:**
 ```bash
-ssh deploy@hc-02.meimberg.io "cd /srv/projects/strapi && docker compose pull && docker compose up -d"
+ssh deploy@hc-02.meimberg.io "cd /srv/projects/awesomeapps-strapi && docker compose pull && docker compose up -d"
 ```
 
 ## Troubleshooting
 
 **Container not starting:**
 ```bash
-ssh deploy@hc-02.meimberg.io "docker compose -f /srv/projects/strapi/docker-compose.yml logs"
+ssh deploy@hc-02.meimberg.io "docker compose -f /srv/projects/awesomeapps-strapi/docker-compose.yml logs"
 ```
 
 **SSL issues:**
 ```bash
-ssh root@hc-02.meimberg.io "docker logs traefik | grep strapi"
+ssh root@hc-02.meimberg.io "docker logs traefik | grep awesomeapps-strapi"
 ```
 
 **DNS check:**
 ```bash
-dig strapi.meimberg.io +short
+dig awesomeapps-strapi.meimberg.io +short
 ```
 
 **Database connection issues:**
 ```bash
-ssh deploy@hc-02.meimberg.io "docker logs strapiDB"
+ssh deploy@hc-02.meimberg.io "docker logs awesomeapps-strapi-db"
 ```
 

@@ -1,18 +1,19 @@
 # Production docker-compose.yml
 # This file is automatically created by GitHub Actions on the server
 # It's included here as reference/documentation
+# PROJECT_NAME is set to: awesomeapps-strapi
 
 version: "3.9"
 
 services:
-  strapi:
-    image: ghcr.io/yourusername/awesomeapps.strapi:latest
-    container_name: strapi
+  awesomeapps-strapi:
+    image: ghcr.io/meimberg-io/awesomeapps.strapi:latest
+    container_name: awesomeapps-strapi
     restart: unless-stopped
     environment:
       - NODE_ENV=production
       - DATABASE_CLIENT=mysql
-      - DATABASE_HOST=strapiDB
+      - DATABASE_HOST=awesomeapps-strapi-db
       - DATABASE_PORT=3306
       - DATABASE_NAME=strapi
       - DATABASE_USERNAME=strapi
@@ -24,23 +25,23 @@ services:
       - TRANSFER_TOKEN_SALT=${TRANSFER_TOKEN_SALT}
       - PORT=1337
     volumes:
-      - strapi-uploads:/opt/app/public/uploads
+      - awesomeapps-strapi-uploads:/opt/app/public/uploads
     labels:
       # Traefik automatic routing
       - "traefik.enable=true"
-      - "traefik.http.routers.strapi.rule=Host(`strapi.meimberg.io`)"
-      - "traefik.http.routers.strapi.entrypoints=websecure"
-      - "traefik.http.routers.strapi.tls.certresolver=le"
-      - "traefik.http.services.strapi.loadbalancer.server.port=1337"
+      - "traefik.http.routers.awesomeapps-strapi.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.awesomeapps-strapi.entrypoints=websecure"
+      - "traefik.http.routers.awesomeapps-strapi.tls.certresolver=le"
+      - "traefik.http.services.awesomeapps-strapi.loadbalancer.server.port=1337"
     networks:
-      - strapi
+      - awesomeapps-strapi
       - traefik
     depends_on:
-      - strapiDB
+      - awesomeapps-strapi-db
 
-  strapiDB:
+  awesomeapps-strapi-db:
     image: mysql:8.0
-    container_name: strapiDB
+    container_name: awesomeapps-strapi-db
     platform: linux/amd64
     restart: unless-stopped
     environment:
@@ -52,16 +53,16 @@ services:
       - MYSQL_TCP_PORT=3306
     command: --default-authentication-plugin=mysql_native_password --port=3306
     volumes:
-      - strapi-data:/var/lib/mysql
+      - awesomeapps-strapi-data:/var/lib/mysql
     networks:
-      - strapi
+      - awesomeapps-strapi
 
 volumes:
-  strapi-data:
-  strapi-uploads:
+  awesomeapps-strapi-data:
+  awesomeapps-strapi-uploads:
 
 networks:
-  strapi:
+  awesomeapps-strapi:
     driver: bridge
   traefik:
     external: true
