@@ -39,7 +39,7 @@ if (!STRAPI_LOCAL_URL || !STRAPI_LOCAL_TOKEN) {
   process.exit(1);
 }
 
-const command = `strapi transfer --to="${STRAPI_LIVE_URL}" --to-token="${STRAPI_LIVE_TOKEN}" --force`;
+const command = `strapi transfer --to="${STRAPI_LIVE_URL}" --to-token="${STRAPI_LIVE_TOKEN}"`;
 
 console.log('⚠️  WARNING: You are about to push local data to the live server!');
 console.log(`📤 Pushing data to: ${STRAPI_LIVE_URL}`);
