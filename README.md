@@ -22,14 +22,22 @@ See [Docker Guide](doc/DOCKER.md) for more details.
 ## Documentation
 
 - **[Docker Setup](doc/DOCKER.md)** - How to run with Docker Compose
-- **[GitHub Actions Setup](doc/GITHUB-SETUP.md)** - Configure deployment pipeline
+- **[Deployment](DEPLOYMENT.md)** - Deployment operations and troubleshooting
+- **[GitHub Setup](GITHUB-SETUP.md)** - Initial deployment configuration
 - **[Data Transfer](doc/DATA-TRANSFER.md)** - Sync data between local and production
 
 ## Deployment
 
-Push to `master` branch triggers automatic deployment via GitHub Actions.
+Automatic deployment on push to `main` branch via GitHub Actions.
 
-See [GitHub Setup Guide](doc/GITHUB-SETUP.md) for configuration details.
+**First time?** Complete setup: [GITHUB-SETUP.md](GITHUB-SETUP.md)
+
+**Deploy:**
+```bash
+git push origin main
+```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for operations and troubleshooting.
 
 ## Tech Stack
 
