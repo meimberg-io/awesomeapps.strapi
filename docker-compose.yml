@@ -1,6 +1,5 @@
 services:
   strapi-dev:
-    profiles: ["", "dev"]
     container_name: strapi-dev
     build:
       context: .
@@ -66,7 +65,6 @@ services:
 
   strapiDB:
     container_name: strapiDB
-    profiles: ["db","prod","dev",""]
     platform: linux/amd64 #for platform error on Apple M1 chips
     restart: unless-stopped
     env_file: .env

@@ -1,26 +1,6 @@
 # Deployment
 
-Automatic deployment on push to `main` branch.
-
-## How It Works
-
-Push to `main` → GitHub Actions:
-1. Builds Docker image
-2. Pushes to GHCR
-3. SSHs to server
-4. Updates container
-
-**Time:** ~3-4 minutes
-
-## Initial Setup
-
-**First time?** Complete setup first: [GITHUB-SETUP.md](GITHUB-SETUP.md)
-
-This covers:
-- GitHub Variables & Secrets
-- DNS configuration
-- Server infrastructure
-- SSH keys
+Automatic deployment on push to `main` via GitHub Actions.
 
 ## Deploy
 
@@ -30,42 +10,99 @@ git push origin main
 
 Watch: https://github.com/meimberg-io/awesomeapps.strapi/actions
 
+**Duration:** ~3-4 minutes
+
+## How It Works
+
+1. Checkout code
+2. Build Docker image
+3. Push to GitHub Container Registry
+4. Copy `docker-compose.prod.yml` to server
+5. SSH to server and run `envsubst` to substitute variables
+6. Pull image and restart containers
+
+**File:** `.github/workflows/deploy.yml`
+**Template:** `docker-compose.prod.yml` (uses `${PROJECT_NAME}`, `${DOCKER_IMAGE}`, `${APP_DOMAIN}`)
+
+## Initial Setup
+
+**First time?** See [GITHUB-SETUP.md](GITHUB-SETUP.md) for:
+- GitHub Secrets/Variables
+- DNS configuration
+- SSH keys
+- Server setup
+
 ## Operations
 
 **View logs:**
 ```bash
-ssh deploy@hc-02.meimberg.io "docker logs awesomeapps-strapi -f"
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker logs awesomeapps-strapi -f"
 ```
 
 **Restart:**
 ```bash
-ssh deploy@hc-02.meimberg.io "cd /srv/projects/awesomeapps-strapi && docker compose restart"
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "cd /srv/projects/awesomeapps-strapi && docker compose restart"
 ```
 
 **Manual deploy:**
 ```bash
-ssh deploy@hc-02.meimberg.io "cd /srv/projects/awesomeapps-strapi && docker compose pull && docker compose up -d"
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "cd /srv/projects/awesomeapps-strapi && docker compose pull && docker compose up -d"
 ```
 
 ## Troubleshooting
 
-**Container not starting:**
+**Container logs:**
 ```bash
-ssh deploy@hc-02.meimberg.io "docker compose -f /srv/projects/awesomeapps-strapi/docker-compose.yml logs"
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker logs awesomeapps-strapi --tail 100"
 ```
 
-**SSL issues:**
+**Database logs:**
 ```bash
-ssh root@hc-02.meimberg.io "docker logs traefik | grep awesomeapps-strapi"
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker logs awesomeapps-strapi-db --tail 50"
 ```
 
-**DNS check:**
+**Traefik routing:**
+```bash
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker logs traefik --tail 50"
+```
+
+**Check running containers:**
+```bash
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io "docker ps"
+```
+
+**DNS:**
 ```bash
 dig awesomeapps-strapi.meimberg.io +short
 ```
 
-**Database connection issues:**
+**Test direct access:**
 ```bash
-ssh deploy@hc-02.meimberg.io "docker logs awesomeapps-strapi-db"
+curl -I https://awesomeapps-strapi.meimberg.io/admin
 ```
 
+## Configuration
+
+**Environment Variables (GitHub Secrets):**
+- `SSH_PRIVATE_KEY` - SSH key for server access
+- `DATABASE_PASSWORD` - MySQL password
+- `APP_KEYS` - Strapi app keys
+- `API_TOKEN_SALT` - API token salt
+- `ADMIN_JWT_SECRET` - Admin JWT secret
+- `TRANSFER_TOKEN_SALT` - Transfer token salt
+- `JWT_SECRET` - JWT secret
+
+**Environment Variables (GitHub Variables):**
+- `SERVER_HOST` - Server hostname (hc-02.meimberg.io)
+- `APP_DOMAIN` - Application domain (awesomeapps-strapi.meimberg.io)
+- `PROJECT_NAME` - Project name (awesomeapps-strapi)
+
+## Server Access
+
+**SSH Key:** `~/.ssh/oli_key`
+
+```bash
+ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io
+```
+
+**Project Directory:** `/srv/projects/awesomeapps-strapi/`
