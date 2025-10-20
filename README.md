@@ -1,69 +1,55 @@
-# ServiceAtlas Strapi CMS
+# AwesomeApps Strapi CMS
 
-A Strapi headless CMS for ServiceAtlas project management.
+Headless CMS for the AwesomeApps service directory.
 
 ## Quick Start
 
-### Local Development
 ```bash
+# Install dependencies
 npm install
+
+# Start with Docker (recommended)
+docker-compose up
+
+# Or without Docker
 npm run dev
 ```
-Open [http://localhost:1337/admin](http://localhost:1337/admin)
 
-### Docker Development (Recommended)
-```bash
-docker-compose up
-```
 Open [http://localhost:1337/admin](http://localhost:1337/admin)
-
-See [Docker Guide](doc/DOCKER.md) for more details.
 
 ## Documentation
 
-- **[Docker Setup](doc/DOCKER.md)** - How to run with Docker Compose
-- **[Deployment](DEPLOYMENT.md)** - Deployment operations and troubleshooting
-- **[GitHub Setup](GITHUB-SETUP.md)** - Initial deployment configuration
 - **[Data Transfer](doc/DATA-TRANSFER.md)** - Sync data between local and production
+- **[Deployment](DEPLOYMENT.md)** - Deploy to production
+- **[GitHub Setup](GITHUB-SETUP.md)** - Initial configuration
+- **[Docker](doc/DOCKER.md)** - Docker setup details
 
-## Deployment
+## Scripts
 
-Automatic deployment on push to `main` branch via GitHub Actions.
-
-**First time?** Complete setup: [GITHUB-SETUP.md](GITHUB-SETUP.md)
-
-**Deploy:**
 ```bash
-git push origin main
+npm run dev          # Development server
+npm run build        # Production build
+npm run start        # Production server
+npm run pull-live    # Pull data from production
+npm run push-live    # Push data to production ⚠️
 ```
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for operations and troubleshooting.
 
 ## Tech Stack
 
-- **Framework**: Strapi 5.12.3
-- **Database**: MySQL 8.0
-- **Language**: TypeScript
-- **Deployment**: Docker + GitHub Actions
+- Strapi 5.28.0
+- MySQL 8.0
+- TypeScript
+- Docker + GitHub Actions
 
-## Available Scripts
+## Environment Setup
 
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run pull-live    # Pull data from live site
-npm run push-live    # Push data to live site ⚠️
-```
-
-## Environment Variables
-
-Copy `env.example` to `.env` and configure:
+Create `.env`:
 
 ```bash
 # Server
 NODE_ENV=development
 APP_PORT=1337
+PORT=1337
 
 # Database
 DATABASE_CLIENT=mysql
@@ -71,7 +57,7 @@ DATABASE_HOST=strapiDB
 DATABASE_PORT=3306
 DATABASE_NAME=strapi
 DATABASE_USERNAME=strapi
-DATABASE_PASSWORD=strapi_password
+DATABASE_PASSWORD=your-password
 
 # Secrets (generate with: openssl rand -base64 32)
 APP_KEYS=key1,key2,key3,key4
@@ -79,40 +65,41 @@ API_TOKEN_SALT=your-salt
 ADMIN_JWT_SECRET=your-secret
 TRANSFER_TOKEN_SALT=your-salt
 JWT_SECRET=your-secret
+
+# Data Transfer
+STRAPI_LIVE_URL=https://awesomeapps-strapi.meimberg.io/admin
+STRAPI_LIVE_TOKEN=your-production-token
+STRAPI_LOCAL_URL=http://localhost:1337/admin
+STRAPI_LOCAL_TOKEN=your-local-token
 ```
 
 ## Docker Profiles
 
 ```bash
-# Development (default - hot reload, volume mounts)
-docker-compose up
-
-# Production (optimized build, persistent volumes)
-docker-compose --profile prod up
+docker-compose up                    # Development (hot reload)
+docker-compose --profile prod up     # Production
+docker-compose --profile db up       # Database only
 ```
-
-## API Endpoints
-
-- **Admin Panel**: `/admin`
-- **REST API**: `/api`
-- **GraphQL**: `/graphql`
 
 ## Content Types
 
-- **Global** - Global site settings
-- **Service** - Individual services
-- **Page** - Static pages
-- **Tag** - Service tags
-- **New Service** - Service creation requests
+- **Service** - Service listings with details, tags, reviews
+- **Member** - Service authors/owners
+- **Tag** - Service categorization
+- **Review** - User reviews with ratings
 
-## Contributing
+## Deployment
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test locally with `docker-compose up`
-5. Submit a pull request
+Push to `main` triggers automatic deployment:
 
-## License
+```bash
+git push origin main
+```
 
-MIT License
+See [DEPLOYMENT.md](DEPLOYMENT.md) for details.
+
+## Production
+
+**URL:** https://awesomeapps-strapi.meimberg.io
+**Server:** hc-02.meimberg.io
+**SSH:** `ssh -i ~/.ssh/oli_key root@hc-02.meimberg.io`

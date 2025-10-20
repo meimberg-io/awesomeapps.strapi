@@ -1,58 +1,51 @@
 # Docker Setup
 
-This document explains how to run Strapi with Docker Compose.
-
-## Prerequisites
-
-- Docker Desktop installed and running
-- Docker Compose available
-
-## Docker Compose Profiles
-
-The project uses Docker Compose profiles to manage different environments:
-
-### Development (Default)
-Runs the development container with hot-reload and volume mounts:
+## Quick Start
 
 ```bash
+# Development (hot reload, volume mounts)
 docker-compose up
-```
 
-This starts:
-- **strapi-dev** on port 1337
-- **strapiDB** (MySQL 8.0) on port 3306
-
-### Production
-Runs the production container with optimized build:
-
-```bash
+# Production (optimized build)
 docker-compose --profile prod up
+
+# Database only
+docker-compose --profile db up
 ```
 
-This starts:
-- **strapi-prod** on port 8202 (configurable via `APP_PORT`)
-- **strapiDB** (MySQL 8.0) on port 3306
+## Profiles
+
+| Profile | Container | Port | Use Case |
+|---------|-----------|------|----------|
+| (default) | strapi-dev | 1337 | Development with hot reload |
+| prod | strapi-prod | 8202 | Production testing |
+| db | strapiDB | 3306 | Database only |
 
 ## Volume Mounts
 
 ### Development
-- `./config` → `/opt/app/config` (read-only)
-- `./src` → `/opt/app/src` (read-only)
-- `./public/uploads` → `/opt/app/public/uploads` (read-write)
-- `package.json` and `package-lock.json` (read-only)
+```yaml
+./config → /opt/app/config
+./src → /opt/app/src
+./public → /opt/app/public  # Full public folder for transfers
+```
 
 ### Production
-- `strapi-uploads` → `/opt/app/public/uploads` (Docker volume for persistent media)
+```yaml
+strapi-uploads:/opt/app/public  # Persistent media storage
+```
+
+**Important:** `/opt/app/public` must be mounted (not just `/uploads`) for data transfers to work.
 
 ## Environment Variables
 
-Create a `.env` file in the project root (see `env.example`):
+Copy `env.example` to `.env`:
 
 ```bash
 # Server
 NODE_ENV=development
-APP_PORT=1337  # External port (host machine)
-PORT=1337      # Internal port (inside container)
+APP_PORT=1337
+PORT=1337
 
 # Database
 DATABASE_CLIENT=mysql
@@ -60,137 +53,79 @@ DATABASE_HOST=strapiDB
 DATABASE_PORT=3306
 DATABASE_NAME=strapi
 DATABASE_USERNAME=strapi
-DATABASE_PASSWORD=strapi_password
+DATABASE_PASSWORD=your-password
 
-# Server URLs (for production)
-SERVER_URL=https://your-domain.com
-PUBLIC_URL=https://your-domain.com
-ADMIN_URL=/admin
-
-# Secrets
+# Secrets (generate: openssl rand -base64 32)
 APP_KEYS=key1,key2,key3,key4
 API_TOKEN_SALT=your-salt
 ADMIN_JWT_SECRET=your-secret
 TRANSFER_TOKEN_SALT=your-salt
 JWT_SECRET=your-secret
+
+# Data Transfer
+STRAPI_LIVE_URL=https://awesomeapps-strapi.meimberg.io/admin
+STRAPI_LIVE_TOKEN=your-token
+STRAPI_LOCAL_URL=http://localhost:1337/admin
+STRAPI_LOCAL_TOKEN=your-token
 ```
 
-## Common Commands
+## Commands
 
-### Start Development
+**Start:**
 ```bash
 docker-compose up -d
+```
+
+**Logs:**
+```bash
 docker-compose logs -f strapi-dev
 ```
 
-### Start Production
-```bash
-docker-compose --profile prod up -d
-docker-compose logs -f strapi-prod
-```
-
-### Stop Containers
+**Stop:**
 ```bash
 docker-compose down
 ```
 
-### Rebuild Images
+**Rebuild:**
 ```bash
 docker-compose build --no-cache
-docker-compose --profile prod up --build
-```
-
-### View Logs
-```bash
-docker-compose logs -f
-```
-
-### Clean Up
-```bash
-# Stop and remove containers, networks
-docker-compose down
-
-# Stop and remove containers, networks, volumes
-docker-compose down -v
-```
-
-## Troubleshooting
-
-### Port Already in Use
-If you get a port conflict error:
-
-```bash
-# Find process using the port
-netstat -ano | findstr :1337
-
-# Kill the process (Windows)
-taskkill /PID <PID> /F
-```
-
-### Database Connection Issues
-If Strapi can't connect to MySQL:
-
-1. Check if MySQL container is healthy:
-   ```bash
-   docker-compose ps
-   ```
-
-2. Check MySQL logs:
-   ```bash
-   docker-compose logs strapiDB
-   ```
-
-3. Verify `DATABASE_HOST` in `.env` is set to `strapiDB`
-
-### Native Module Issues
-If you see errors about `sharp` or `@swc/core`:
-
-```bash
-# Rebuild with no cache
-docker-compose build --no-cache
-```
-
-### Fresh Start
-To completely reset the Docker setup:
-
-```bash
-docker-compose down -v
-docker volume rm serviceatlas-strapi_strapi-data serviceatlas-strapi_strapi-uploads
 docker-compose up --build
 ```
 
-## Running Multiple Strapi Instances
-
-If you need to run multiple Strapi instances on the same server, configure different ports:
-
-**Instance 1 (ServiceAtlas):**
+**Fresh start (⚠️ deletes data):**
 ```bash
-APP_PORT=8202  # External port
-PORT=1337      # Internal port
+docker-compose down -v
+docker-compose up --build
 ```
-
-**Instance 2 (Another App):**
-```bash
-APP_PORT=8203  # Different external port
-PORT=1338      # Different internal port (avoid conflicts)
-```
-
-The mapping works as: `APP_PORT:PORT` → `8202:1337` means external port 8202 maps to container port 1337.
 
 ## Access
 
-- **Development Admin**: http://localhost:1337/admin
-- **Production Admin**: http://localhost:8202/admin (or configured port)
-- **API**: http://localhost:1337/api (or 8202 for prod)
+- Admin: http://localhost:1337/admin
+- API: http://localhost:1337/api
+- GraphQL: http://localhost:1337/graphql
 
-**Note:** MySQL is only accessible within the Docker network (not exposed to host) for security.
+## Troubleshooting
 
-## Database Volumes
+**Port conflict:**
+```bash
+# Find process
+netstat -ano | findstr :1337
+# Kill it
+taskkill /PID <PID> /F
+```
 
-Data persistence is handled via Docker volumes:
+**Database issues:**
+```bash
+docker-compose logs strapiDB
+docker-compose ps  # Check health
+```
 
-- **strapi-data**: MySQL database files
-- **strapi-uploads**: Uploaded media files (production only)
+**Transfer errors:**
+- Check volume mount includes `/opt/app/public` (not just `/public/uploads`)
+- Restart container: `docker-compose restart`
 
-These volumes persist even when containers are stopped or removed.
+**Module errors (sharp, @swc/core):**
+```bash
+docker-compose build --no-cache
+```
 
