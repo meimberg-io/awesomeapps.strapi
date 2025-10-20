@@ -2,6 +2,8 @@
 
 Headless CMS for the AwesomeApps service directory.
 
+**First time?** See [doc/SETUP.md](doc/SETUP.md) to create required local files (`.env`)
+
 ## Quick Start
 
 ```bash
@@ -19,9 +21,10 @@ Open [http://localhost:1337/admin](http://localhost:1337/admin)
 
 ## Documentation
 
+- **[Setup](doc/SETUP.md)** - First-time local setup
 - **[Data Transfer](doc/DATA-TRANSFER.md)** - Sync data between local and production
-- **[Deployment](DEPLOYMENT.md)** - Deploy to production
-- **[GitHub Setup](GITHUB-SETUP.md)** - Initial configuration
+- **[Deployment](doc/DEPLOYMENT.md)** - Deploy to production
+- **[GitHub Setup](doc/GITHUB-SETUP.md)** - Initial configuration
 - **[Docker](doc/DOCKER.md)** - Docker setup details
 
 ## Scripts
@@ -96,7 +99,7 @@ Push to `main` triggers automatic deployment:
 git push origin main
 ```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for details.
+See [doc/DEPLOYMENT.md](doc/DEPLOYMENT.md) for details.
 
 ## Production
 
