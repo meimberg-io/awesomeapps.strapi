@@ -27,7 +27,7 @@ services:
     volumes:
       - awesomeapps-strapi-uploads:/opt/app/public
     labels:
-      # Traefik automatic routing
+      # Traefik automatic routing.
       - "traefik.enable=true"
       - "traefik.http.routers.awesomeapps-strapi.rule=Host(`${APP_DOMAIN}`)"
       - "traefik.http.routers.awesomeapps-strapi.entrypoints=websecure"
