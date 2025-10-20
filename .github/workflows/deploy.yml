@@ -63,13 +63,25 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
     
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Copy docker-compose template to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ vars.SERVER_HOST }}
+        username: ${{ vars.SERVER_USER || 'deploy' }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "docker-compose.prod.yml"
+        target: "/srv/projects/${{ env.PROJECT_NAME }}/"
+    
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ vars.SERVER_HOST }}
         username: ${{ vars.SERVER_USER || 'deploy' }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        envs: PROJECT_NAME,GITHUB_TOKEN,DOCKER_IMAGE,DATABASE_PASSWORD,APP_KEYS,API_TOKEN_SALT,ADMIN_JWT_SECRET,TRANSFER_TOKEN_SALT,JWT_SECRET
+        envs: PROJECT_NAME,GITHUB_TOKEN,DOCKER_IMAGE,APP_DOMAIN,DATABASE_PASSWORD,APP_KEYS,API_TOKEN_SALT,ADMIN_JWT_SECRET,TRANSFER_TOKEN_SALT,JWT_SECRET
         script: |
           set -e
           
@@ -97,59 +109,15 @@ jobs:
           PORT=1337
           EOF
           
-          # Create docker-compose.yml with Traefik labels
-          cat > docker-compose.yml << EOF
-          version: "3.9"
+          # Substitute variables in docker-compose template
+          export PROJECT_NAME="${PROJECT_NAME}"
+          export DOCKER_IMAGE="${DOCKER_IMAGE}"
+          export APP_DOMAIN="${APP_DOMAIN}"
           
-          services:
-            ${PROJECT_NAME}:
-              image: $DOCKER_IMAGE
-              container_name: ${PROJECT_NAME}
-              restart: unless-stopped
-              env_file: .env
-              volumes:
-                - ${PROJECT_NAME}-uploads:/opt/app/public/uploads
-              labels:
-                - "traefik.enable=true"
-                - "traefik.http.routers.${PROJECT_NAME}.rule=Host(\`${{ env.APP_DOMAIN }}\`)"
-                - "traefik.http.routers.${PROJECT_NAME}.entrypoints=websecure"
-                - "traefik.http.routers.${PROJECT_NAME}.tls.certresolver=le"
-                - "traefik.http.services.${PROJECT_NAME}.loadbalancer.server.port=1337"
-              networks:
-                - ${PROJECT_NAME}
-                - traefik
-              depends_on:
-                - ${PROJECT_NAME}-db
+          envsubst < docker-compose.prod.yml > docker-compose.yml
           
-            ${PROJECT_NAME}-db:
-              image: mysql:8.0
-              container_name: ${PROJECT_NAME}-db
-              platform: linux/amd64
-              restart: unless-stopped
-              env_file: .env
-              environment:
-                - MYSQL_ROOT_HOST=%
-                - MYSQL_USER=strapi
-                - MYSQL_ROOT_PASSWORD=\${DATABASE_PASSWORD}
-                - MYSQL_PASSWORD=\${DATABASE_PASSWORD}
-                - MYSQL_DATABASE=strapi
-                - MYSQL_TCP_PORT=3306
-              command: --default-authentication-plugin=mysql_native_password --port=3306
-              volumes:
-                - ${PROJECT_NAME}-data:/var/lib/mysql
-              networks:
-                - ${PROJECT_NAME}
-          
-          volumes:
-            ${PROJECT_NAME}-data:
-            ${PROJECT_NAME}-uploads:
-          
-          networks:
-            ${PROJECT_NAME}:
-              driver: bridge
-            traefik:
-              external: true
-          EOF
+          echo "Generated docker-compose.yml:"
+          cat docker-compose.yml
           
           # Pull latest image and deploy
           docker compose pull

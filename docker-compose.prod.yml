@@ -1,68 +1,54 @@
 # Production docker-compose.yml
-# This file is automatically created by GitHub Actions on the server
-# It's included here as reference/documentation
-# PROJECT_NAME is set to: awesomeapps-strapi
+# Used by GitHub Actions deployment workflow
+# Variables are substituted using envsubst during deployment
 
 version: "3.9"
 
 services:
-  awesomeapps-strapi:
-    image: ghcr.io/meimberg-io/awesomeapps.strapi:latest
-    container_name: awesomeapps-strapi
+  ${PROJECT_NAME}:
+    image: ${DOCKER_IMAGE}
+    container_name: ${PROJECT_NAME}
     restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - DATABASE_CLIENT=mysql
-      - DATABASE_HOST=awesomeapps-strapi-db
-      - DATABASE_PORT=3306
-      - DATABASE_NAME=strapi
-      - DATABASE_USERNAME=strapi
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
-      - APP_KEYS=${APP_KEYS}
-      - API_TOKEN_SALT=${API_TOKEN_SALT}
-      - TRANSFER_TOKEN_SALT=${TRANSFER_TOKEN_SALT}
-      - PORT=1337
+    env_file: .env
     volumes:
-      - awesomeapps-strapi-uploads:/opt/app/public
+      - ${PROJECT_NAME}-uploads:/opt/app/public
     labels:
-      # Traefik automatic routing.
       - "traefik.enable=true"
-      - "traefik.http.routers.awesomeapps-strapi.rule=Host(`${APP_DOMAIN}`)"
-      - "traefik.http.routers.awesomeapps-strapi.entrypoints=websecure"
-      - "traefik.http.routers.awesomeapps-strapi.tls.certresolver=le"
-      - "traefik.http.services.awesomeapps-strapi.loadbalancer.server.port=1337"
+      - "traefik.http.routers.${PROJECT_NAME}.rule=Host(\`${APP_DOMAIN}\`)"
+      - "traefik.http.routers.${PROJECT_NAME}.entrypoints=websecure"
+      - "traefik.http.routers.${PROJECT_NAME}.tls.certresolver=le"
+      - "traefik.http.services.${PROJECT_NAME}.loadbalancer.server.port=1337"
     networks:
-      - awesomeapps-strapi
+      - ${PROJECT_NAME}
       - traefik
     depends_on:
-      - awesomeapps-strapi-db
+      - ${PROJECT_NAME}-db
 
-  awesomeapps-strapi-db:
+  ${PROJECT_NAME}-db:
     image: mysql:8.0
-    container_name: awesomeapps-strapi-db
+    container_name: ${PROJECT_NAME}-db
     platform: linux/amd64
     restart: unless-stopped
+    env_file: .env
     environment:
       - MYSQL_ROOT_HOST=%
       - MYSQL_USER=strapi
-      - MYSQL_ROOT_PASSWORD=${DATABASE_PASSWORD}
-      - MYSQL_PASSWORD=${DATABASE_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=\${DATABASE_PASSWORD}
+      - MYSQL_PASSWORD=\${DATABASE_PASSWORD}
       - MYSQL_DATABASE=strapi
       - MYSQL_TCP_PORT=3306
     command: --default-authentication-plugin=mysql_native_password --port=3306
     volumes:
-      - awesomeapps-strapi-data:/var/lib/mysql
+      - ${PROJECT_NAME}-data:/var/lib/mysql
     networks:
-      - awesomeapps-strapi
+      - ${PROJECT_NAME}
 
 volumes:
-  awesomeapps-strapi-data:
-  awesomeapps-strapi-uploads:
+  ${PROJECT_NAME}-data:
+  ${PROJECT_NAME}-uploads:
 
 networks:
-  awesomeapps-strapi:
+  ${PROJECT_NAME}:
     driver: bridge
   traefik:
     external: true
