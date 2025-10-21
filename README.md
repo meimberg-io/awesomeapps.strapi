@@ -26,6 +26,7 @@ Open [http://localhost:1337/admin](http://localhost:1337/admin)
 - **[Deployment](doc/DEPLOYMENT.md)** - Deploy to production
 - **[GitHub Setup](doc/GITHUB-SETUP.md)** - Initial configuration
 - **[Docker](doc/DOCKER.md)** - Docker setup details
+- **[Two-Network Issue](doc/TWO-NETWORK-ISSUE.md)** - Fix for 504 errors when Strapi is on multiple networks
 
 ## Scripts
 
