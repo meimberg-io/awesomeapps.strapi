@@ -25,27 +25,33 @@ async function updateServiceReviewStats(event) {
         return;
     }
     
-    // Get the service ID from the review
-    let serviceId;
-    if (result?.service?.id) {
-        serviceId = result.service.id;
-    } else if (params?.data?.service) {
-        serviceId = params.data.service;
-    }
-
-    strapi.log.info(`Lifecycle hook triggered - serviceId: ${serviceId}`);
+    // Get the service ID by fetching the review with populated service relation
+    let serviceId = null;
     
-    if (!serviceId) {
-        strapi.log.warn('No service ID found in review lifecycle hook');
+    try {
+        // Fetch the review with populated service relation to get the actual service ID
+        const reviewWithService = await strapi.db.query('api::review.review').findOne({
+            where: { id: result.id },
+            populate: ['service']
+        });
+        
+        if (reviewWithService?.service?.id) {
+            serviceId = reviewWithService.service.id;
+        } else {
+            strapi.log.warn('Could not find service ID from populated relation');
+            return;
+        }
+    } catch (error) {
+        strapi.log.error('Error fetching review with service relation:', error);
         return;
     }
 
     try {
-        // Count only published reviews using Strapi's built-in count method
+        // Count only published reviews using publishedAt field
         const reviewCount = await strapi.db.query('api::review.review').count({
             where: {
                 service: serviceId,
-                isPublished: true,
+                publishedAt: { $notNull: true }
             },
         });
 
@@ -55,26 +61,55 @@ async function updateServiceReviewStats(event) {
             const reviews = await strapi.db.query('api::review.review').findMany({
                 where: {
                     service: serviceId,
-                    isPublished: true,
+                    publishedAt: { $notNull: true }
                 },
                 select: ['voting'],
             });
 
-            const totalVotes = reviews.reduce((sum, review) => sum + review.voting, 0);
+            const totalVotes = reviews.reduce((sum, review) => sum + (review.voting || 0), 0);
             averageRating = totalVotes / reviewCount;
         }
 
-        // Update the service with cached values
-        await strapi.entityService.update('api::service.service', serviceId, {
-            data: {
-                reviewCount,
-                averageRating,
-            } as any,
+        // First, get the documentId of the service to find all locale versions
+        const service = await strapi.db.query('api::service.service').findOne({
+            where: { id: serviceId },
+            select: ['documentId'],
         });
 
-        strapi.log.info(`Updated review stats for service ${serviceId}: count=${reviewCount}, avg=${averageRating}`);
+        if (service?.documentId) {
+            // Find all services with the same documentId
+            const allServices = await strapi.db.query('api::service.service').findMany({
+                where: { documentId: service.documentId },
+                select: ['id'],
+            });
+
+            // Update each service individually
+            for (const serviceToUpdate of allServices) {
+                await strapi.db.query('api::service.service').update({
+                    where: { id: serviceToUpdate.id },
+                    data: {
+                        reviewCount,
+                        averageRating,
+                    },
+                });
+            }
+
+            strapi.log.info(`Updated review stats for all locales of service ${serviceId}: count=${reviewCount}, avg=${averageRating}`);
+        } else {
+            // Fallback to single service update if documentId not found
+            await strapi.db.query('api::service.service').update({
+                where: { id: serviceId },
+                data: {
+                    reviewCount,
+                    averageRating,
+                },
+            });
+
+            strapi.log.info(`Updated review stats for service ${serviceId}: count=${reviewCount}, avg=${averageRating}`);
+        }
     } catch (error) {
         strapi.log.error('Error updating service review stats:', error);
     }
 }
+
 
