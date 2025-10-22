@@ -1,3 +1,5 @@
+import { factories } from '@strapi/strapi';
+
 export default {
     async afterCreate(event) {
         await updateServiceReviewStats(event);
@@ -15,6 +17,14 @@ export default {
 async function updateServiceReviewStats(event) {
     const { result, params } = event;
     
+    // Get strapi instance
+    const strapi = (global as any).strapi;
+    
+    if (!strapi) {
+        console.error('Strapi instance not available in lifecycle hook');
+        return;
+    }
+    
     // Get the service ID from the review
     let serviceId;
     if (result?.service?.id) {
@@ -23,7 +33,10 @@ async function updateServiceReviewStats(event) {
         serviceId = params.data.service;
     }
 
+    strapi.log.info(`Lifecycle hook triggered - serviceId: ${serviceId}`);
+    
     if (!serviceId) {
+        strapi.log.warn('No service ID found in review lifecycle hook');
         return;
     }
 

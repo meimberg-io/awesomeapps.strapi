@@ -12,6 +12,7 @@ services:
     env_file: .env
     volumes:
       - ${PROJECT_NAME}-uploads:/opt/app/public
+      - /srv/backups/strapi:/opt/app/backup  # Backup mount
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
