@@ -90,6 +90,7 @@ jobs:
           
           # Create project directory
           mkdir -p /srv/projects/${PROJECT_NAME}
+          mkdir -p /srv/backups/${PROJECT_NAME}
           cd /srv/projects/${PROJECT_NAME}
           
           # Create .env file with secrets
