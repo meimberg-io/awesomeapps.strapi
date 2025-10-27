@@ -25,7 +25,7 @@ export default {
         const extension = ({nexus}) => ({
             typeDefs: `
                   extend type Tag {
-                    count(additionalTags: [ID]!): Int
+                    count(additionalTags: [ID]!, locale: I18NLocaleCode): Int
                   },
                    type Query {
                 servicesbytags(tags: [ID]!, sort: String, locale: I18NLocaleCode): [Service]
@@ -37,6 +37,7 @@ export default {
                         resolve: async (parent, args, context) => {
 
                             const additionalTags = args.additionalTags || [];
+                            const locale = args.locale || 'en';
                             const tagIds = [...new Set([parent.documentId, ...additionalTags])];
                             const requiredTagCount = tagIds.length;
 
@@ -45,6 +46,7 @@ export default {
                                 .join('tags as t', 'st.tag_id', 't.id')
                                 .whereNotNull('s.published_at')  // Services müssen veröffentlicht sein
                                 .whereNotNull('t.published_at')  // Tags müssen veröffentlicht sein
+                                .where('s.locale', locale)  // Filter by locale
                                 .whereIn('t.document_id', tagIds)
                                 .groupBy('s.id')
                                 .havingRaw('COUNT(DISTINCT st.tag_id) = ?', [requiredTagCount])
