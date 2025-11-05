@@ -30,6 +30,11 @@
     },
     "icon": {
       "type": "string"
+    },
+    "excluded": {
+      "type": "boolean",
+      "required": true,
+      "default": false
     }
   }
 }
