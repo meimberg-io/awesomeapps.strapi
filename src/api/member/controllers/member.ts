@@ -56,13 +56,14 @@ export default factories.createCoreController('api::member.member' as any, ({ st
 
   /**
    * Get member profile with statistics
-   * GET /api/members/:id/profile
+   * GET /api/members/:id/profile?locale=en
    */
   async profile(ctx) {
     try {
       const { id } = ctx.params;
+      const locale = ctx.query.locale || 'de';
 
-      const member = await strapi.service('api::member.member').findOneWithRelations(parseInt(id));
+      const member = await strapi.service('api::member.member').findOneWithRelations(parseInt(id), locale);
       if (!member) {
         return ctx.notFound('Member not found');
       }
@@ -200,13 +201,14 @@ export default factories.createCoreController('api::member.member' as any, ({ st
 
   /**
    * Get member favorites
-   * GET /api/members/:id/favorites
+   * GET /api/members/:id/favorites?locale=en
    */
   async getFavorites(ctx) {
     try {
       const { id } = ctx.params;
+      const locale = ctx.query.locale || 'de';
 
-      const member = await strapi.service('api::member.member').findOneWithRelations(parseInt(id));
+      const member = await strapi.service('api::member.member').findOneWithRelations(parseInt(id), locale);
       if (!member) {
         return ctx.notFound('Member not found');
       }

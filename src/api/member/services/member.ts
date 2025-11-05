@@ -110,18 +110,39 @@ export default factories.createCoreService('api::member.member' as any, ({ strap
   /**
    * Get member by ID with relations
    */
-  async findOneWithRelations(id: number) {
-    return await strapi.db.query('api::member.member').findOne({
+  async findOneWithRelations(id: number, locale: string = 'de') {
+    const member = await strapi.db.query('api::member.member').findOne({
       where: { id },
       populate: {
         favorites: {
-          populate: ['logo', 'thumbnail', 'tags'],
+          populate: ['logo', 'thumbnail', 'tags', 'localizations'],
         },
         reviews: {
           populate: ['service'],
         },
       },
     });
+
+    // If locale is specified and different from default, try to get localized versions
+    if (member && member.favorites && locale !== 'de') {
+      member.favorites = await Promise.all(
+        member.favorites.map(async (service: any) => {
+          // Try to find the localized version
+          const localizedService = await strapi.db.query('api::service.service').findOne({
+            where: { 
+              locale,
+              documentId: service.documentId,
+            },
+            populate: ['logo', 'thumbnail', 'tags'],
+          });
+          
+          // Return localized version if it exists, otherwise return original
+          return localizedService || service;
+        })
+      );
+    }
+
+    return member;
   },
 
   /**
