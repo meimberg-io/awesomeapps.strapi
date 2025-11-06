@@ -11,11 +11,17 @@ export default factories.createCoreController('api::tag.tag', ({ strapi }) => ({
             populate: { services: true }, // Services mit einbeziehen
         });
 
-        // Berechne die Anzahl der verknüpften Services
-        const tagsWithCount = tags.map(tag => ({
-            ...tag,
-            count: tag.services.length, // Anzahl der verknüpften Services
-        }));
+        // Berechne die Anzahl der verknüpften Services (unique by documentId, not locale)
+        const tagsWithCount = tags.map(tag => {
+            // Get unique service documentIds (count each service once, regardless of locale)
+            const uniqueServiceIds = new Set(
+                tag.services.map(service => service.documentId || service.id).filter(Boolean)
+            );
+            return {
+                ...tag,
+                count: uniqueServiceIds.size, // Anzahl der eindeutigen Services (ohne Lokalisierung)
+            };
+        });
 
         return tagsWithCount;
     },
