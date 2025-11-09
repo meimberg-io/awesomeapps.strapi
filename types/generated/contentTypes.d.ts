@@ -815,6 +815,9 @@ export interface ApiTagTag extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::tag.tag'> &
       Schema.Attribute.Private;
     name: Schema.Attribute.String;
+    tagStatus: Schema.Attribute.Enumeration<['active', 'proposed', 'excluded']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'active'>;
     publishedAt: Schema.Attribute.DateTime;
     services: Schema.Attribute.Relation<'manyToMany', 'api::service.service'>;
     updatedAt: Schema.Attribute.DateTime;

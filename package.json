@@ -8,6 +8,7 @@
     "deploy": "strapi deploy",
     "develop": "strapi develop",
     "seed:example": "node ./scripts/seed.js",
+    "migrate:tag-status": "node ./scripts/migrate-tag-status.js",
     "start": "strapi start",
     "strapi": "strapi",
     "pull-live": "./scripts/docker-exec.sh pull-live.js",

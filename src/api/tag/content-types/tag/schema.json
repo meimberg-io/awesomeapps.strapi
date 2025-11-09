@@ -31,10 +31,15 @@
     "icon": {
       "type": "string"
     },
-    "excluded": {
-      "type": "boolean",
-      "required": false,
-      "default": false
+    "tagStatus": {
+      "type": "enumeration",
+      "enum": [
+        "active",
+        "proposed",
+        "excluded"
+      ],
+      "default": "active",
+      "required": true
     }
   }
 }
