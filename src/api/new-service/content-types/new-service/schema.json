@@ -26,6 +26,9 @@
     },
     "field": {
       "type": "string"
+    },
+    "errorMessage": {
+      "type": "text"
     }
   }
 }
