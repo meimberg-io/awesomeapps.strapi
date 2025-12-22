@@ -23,7 +23,6 @@ services:
       - ./config:/opt/app/config
       - ./src:/opt/app/src
       - ./package.json:/opt/package.json
-      - ./package-lock.json:/opt/package-lock.json
       - ./.env:/opt/app/.env
       - ./public:/opt/app/public
     ports:
